@@ -1,0 +1,24 @@
+# Railway.toml - Railway deployment configuration
+# https://docs.railway.app/deploy/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "python manage.py migrate --noinput && gunicorn pathaibackend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Health check configuration
+[deploy.healthcheck]
+path = "/api/health/"
+timeout = 100
+interval = 30
+
+# Resource configuration (optional, Railway auto-scales)
+# [deploy.resources]
+# replicas = 1
+
+# Environment variable validation (Railway will prompt for these)
+# Configure these in Railway dashboard

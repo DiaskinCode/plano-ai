@@ -1,0 +1,64 @@
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables (IMPORTANT: Contains API keys!)
+*.env
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.pyc
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static/
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat.pid
+dump.rdb
+dump 2.rdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local scripts
+add_milestone_metadata.py
+check_db.py
+debug_onboarding_state.py
+fix_user_39_state.py
+update_tasks_for_testing.py
+test_*.py
+test_*.sh
