@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pathaibackend.settings')
+# Use production settings for Railway deployment, fallback to default for local dev
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pathaibackend.production')
 
 application = get_wsgi_application()

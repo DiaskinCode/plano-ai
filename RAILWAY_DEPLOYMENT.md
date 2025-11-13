@@ -243,24 +243,33 @@ Celery Beat handles scheduled tasks (like reminder checks).
 3. Click "**+ New Variable**"
 4. Add these one by one:
 
-#### Required Variables
+#### Required Variables (Priority Order)
+
+**⚠️ CRITICAL - Set these first or deployment will fail:**
 
 ```bash
-# Django Settings
-DJANGO_SETTINGS_MODULE=pathaibackend.production
-SECRET_KEY=<generate-new-secret-key>
+# 1. Django Settings (MUST BE SET FIRST)
+DJANGO_SETTINGS_MODULE=pathaibackend.production  # ⚠️ CRITICAL - Without this, app uses SQLite instead of PostgreSQL!
+
+# 2. Security Settings
+SECRET_KEY=<generate-new-secret-key>  # Generate with command below
 DEBUG=False
 ALLOWED_HOSTS=.railway.app
 
-# CORS (add your frontend URL)
+# 3. CORS (add your frontend URL)
 CORS_ALLOWED_ORIGINS=https://your-frontend-url.com
 CSRF_TRUSTED_ORIGINS=https://your-backend.railway.app
 
-# AI API Keys
+# 4. AI API Keys
 OPENAI_API_KEY=sk-your-openai-key
 ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
-TAVILY_API_KEY=tvly-your-tavily-key
+TAVILY_API_KEY=tvly-your-tavily-key  # Optional - web search will be disabled if not set
 ```
+
+**Why DJANGO_SETTINGS_MODULE is critical:**
+- Without it, Django uses default `settings.py` which points to SQLite
+- Migrations will run on SQLite, but app won't persist data in container
+- With it set to `pathaibackend.production`, Django uses Railway's PostgreSQL via `DATABASE_URL`
 
 #### Generate SECRET_KEY
 
@@ -419,6 +428,49 @@ railway logs --service celery-worker
 ---
 
 ## Troubleshooting
+
+### Issue: "Application failed to respond"
+
+**Error**: Deployment shows "Completed" but accessing URL shows "Application failed to respond"
+
+**Root Causes & Solutions**:
+
+1. **Missing health check endpoint** (Most Common):
+   ```bash
+   # Solution: Health endpoint is now added at /api/health/
+   # Railway will check this endpoint every 30 seconds
+   # If it returns 200 OK, deployment is considered healthy
+   ```
+
+2. **Using wrong Django settings**:
+   ```bash
+   # Problem: App uses settings.py (SQLite) instead of production.py (PostgreSQL)
+   # Solution: Set DJANGO_SETTINGS_MODULE=pathaibackend.production in Railway variables
+   # This is now set automatically in Dockerfile and wsgi.py
+   ```
+
+3. **Database not connected**:
+   ```bash
+   # Check if DATABASE_URL is set in Railway
+   # Go to Variables tab → Should see DATABASE_URL from PostgreSQL service
+   ```
+
+4. **CORS blocking requests**:
+   ```bash
+   # Add your frontend URL to CORS_ALLOWED_ORIGINS
+   # Example: https://your-app.expo.dev,https://localhost:8081
+   ```
+
+5. **Check deploy logs**:
+   ```bash
+   # In Railway dashboard:
+   # 1. Click on web service
+   # 2. Go to "Deploy Logs" tab
+   # 3. Look for errors after "Starting Container"
+   # Common errors: ImportError, DatabaseError, ConnectionRefused
+   ```
+
+---
 
 ### Issue: Build Fails
 
