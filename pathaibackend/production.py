@@ -81,16 +81,26 @@ CELERY_RESULT_EXPIRES = 3600  # 1 hour
 
 # CORS CONFIGURATION
 # Update with your frontend URL
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+cors_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
 CORS_ALLOW_CREDENTIALS = True
+
+# If no CORS origins are set, allow Railway domain by default
+if not CORS_ALLOWED_ORIGINS and 'RAILWAY_PUBLIC_DOMAIN' in os.environ:
+    CORS_ALLOWED_ORIGINS = [f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}"]
 
 # If you need to allow all origins temporarily (NOT recommended for production)
 # CORS_ALLOW_ALL_ORIGINS = True
 
 # CSRF CONFIGURATION
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+csrf_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_env.split(',') if origin.strip()]
+
+# Always add Railway domain to CSRF trusted origins if available
 if 'RAILWAY_PUBLIC_DOMAIN' in os.environ:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}")
+    railway_origin = f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}"
+    if railway_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_origin)
 
 # LOGGING CONFIGURATION
 LOGGING = {
