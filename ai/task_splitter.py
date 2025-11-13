@@ -95,7 +95,7 @@ Cognitive Load: {task.cognitive_load}/5
 Priority: {task.priority}
 Deadline: {task.scheduled_date}
 
-{f"USER CONTEXT:\\n{user_context}" if user_context else ""}
+{"USER CONTEXT:" + chr(10) + user_context if user_context else ""}
 
 TASK BREAKDOWN REQUIREMENTS:
 1. Create 2-5 sub-tasks (prefer 3)
