@@ -1139,18 +1139,36 @@ def generate_tasks_for_goalspecs(user, goalspecs):
                 if 'milestone_index' in task_data:
                     notes_data['milestone_index'] = task_data['milestone_index']
 
+                # Validate CharField values to prevent truncation errors
+                # Valid choices for each field
+                valid_task_types = ['auto', 'copilot', 'manual']
+                valid_deliverable_types = ['spreadsheet', 'doc', 'email', 'recording', 'link', 'shortlist', 'file', 'note', 'other']
+                valid_sources = ['ai_generated', 'user_added', 'integrated', 'ai_agent', 'daily_planner', 'web_research']
+
+                task_type = task_data.get('task_type', 'copilot')
+                if task_type not in valid_task_types:
+                    task_type = 'copilot'
+
+                deliverable_type = task_data.get('deliverable_type', 'note')
+                if deliverable_type not in valid_deliverable_types:
+                    deliverable_type = 'note'
+
+                source = task_data.get('source', 'ai_generated')
+                if source not in valid_sources:
+                    source = 'ai_generated'
+
                 # Create task
                 Todo.objects.create(
                     user=user,
                     goalspec=goalspec,
                     title=task_title,
                     description=task_data.get('description', ''),
-                    task_type=task_data.get('task_type', 'copilot'),
+                    task_type=task_type,
                     priority=priority_int,
                     scheduled_date=scheduled_date,
                     timebox_minutes=task_data.get('timebox_minutes', 60),
-                    deliverable_type=task_data.get('deliverable_type', 'note'),
-                    source=task_data.get('source', 'template_agent'),
+                    deliverable_type=deliverable_type,
+                    source=source,
                     status='ready',
                     definition_of_done=task_data.get('definition_of_done', []),
                     constraints=task_data.get('constraints', {}),
