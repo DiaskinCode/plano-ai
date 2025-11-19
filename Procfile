@@ -2,7 +2,7 @@
 # Defines different process types for your application
 
 # Web server process (main Django application)
-web: bash -c "python manage.py migrate --noinput && gunicorn pathaibackend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --threads 4 --timeout 120 --log-level debug"
+web: bash -c "python manage.py migrate --noinput && echo 'Starting Gunicorn on port ${PORT:-8000}...' && gunicorn pathaibackend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --threads 4 --timeout 120 --log-level debug --capture-output --enable-stdio-inheritance"
 
 # Celery worker process (for background tasks)
 # Note: Deploy this as a separate Railway service
