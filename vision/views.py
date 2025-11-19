@@ -476,7 +476,7 @@ class DailyHeadlineView(APIView):
     def get(self, request):
         # NEW: Get primary GoalSpec instead of Vision
         from users.models import GoalSpec
-        from todos.models import AtomicTask
+        from todos.models import Todo
 
         primary_goalspec = GoalSpec.objects.filter(
             user=request.user,
@@ -519,7 +519,7 @@ class DailyHeadlineView(APIView):
 
         # Generate headline from GoalSpec
         today = timezone.now().date()
-        tasks_today = AtomicTask.objects.filter(
+        tasks_today = Todo.objects.filter(
             user=request.user,
             goalspec=primary_goalspec,
             scheduled_date=today

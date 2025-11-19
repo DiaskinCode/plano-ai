@@ -94,10 +94,10 @@ def get_daily_headline(request):
             })
 
         # Get today's todos for this goalspec
-        from todos.models import AtomicTask
+        from todos.models import Todo
         today = timezone.now().date()
 
-        tasks_today = AtomicTask.objects.filter(
+        tasks_today = Todo.objects.filter(
             user=request.user,
             goalspec=primary_goalspec,
             scheduled_date=today
@@ -236,14 +236,14 @@ def get_vision_analytics(request):
 
         analytics = []
         for goalspec in goalspecs:
-            from todos.models import AtomicTask
+            from todos.models import Todo
 
-            total_tasks = AtomicTask.objects.filter(
+            total_tasks = Todo.objects.filter(
                 user=request.user,
                 goalspec=goalspec
             ).count()
 
-            completed_tasks = AtomicTask.objects.filter(
+            completed_tasks = Todo.objects.filter(
                 user=request.user,
                 goalspec=goalspec,
                 status='done'
