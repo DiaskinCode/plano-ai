@@ -906,6 +906,15 @@ def save_to_user_profile(user, category, extracted_data):
             profile.notable_achievements = extracted_data['notable_achievements']
         if 'target_role' in extracted_data:
             profile.target_role = extracted_data['target_role']
+        # NEW: Enhanced career data collection
+        if 'work_history' in extracted_data:
+            profile.work_history = extracted_data['work_history']
+        if 'projects' in extracted_data:
+            profile.projects = extracted_data['projects']
+        if 'courses_certifications' in extracted_data:
+            profile.courses_certifications = extracted_data['courses_certifications']
+        if 'education_background' in extracted_data:
+            profile.education_background = extracted_data['education_background']
 
     elif category == 'study':
         # Save study-specific fields
@@ -1049,12 +1058,41 @@ def generate_tasks_for_goalspecs(user, goalspecs):
 
     total_tasks = 0
 
-    for goalspec in goalspecs:
-        agent = AtomicTaskAgent(user)
-        tasks = agent.generate_atomic_tasks(
-            goalspec,
-            days_ahead=30
-        )
+    print(f"[TASK_GEN] ========== STARTING TASK GENERATION ==========")
+    print(f"[TASK_GEN] User: {user.id} - {user.email}")
+    print(f"[TASK_GEN] Number of goalspecs: {len(goalspecs)}")
+
+    for i, goalspec in enumerate(goalspecs):
+        print(f"[TASK_GEN] --- Processing GoalSpec {i+1}/{len(goalspecs)} ---")
+        print(f"[TASK_GEN] GoalSpec ID: {goalspec.id}")
+        print(f"[TASK_GEN] GoalSpec Title: {goalspec.title}")
+        print(f"[TASK_GEN] GoalSpec Category: {goalspec.category}")
+
+        # Log profile data relevant to task generation
+        profile = user.profile
+        print(f"[TASK_GEN] Profile - target_role: {profile.target_role}")
+        print(f"[TASK_GEN] Profile - current_role: {profile.current_role}")
+        print(f"[TASK_GEN] Profile - tech_stack: {profile.tech_stack}")
+        print(f"[TASK_GEN] Profile - target_companies: {profile.target_companies}")
+
+        try:
+            agent = AtomicTaskAgent(user)
+            tasks = agent.generate_atomic_tasks(
+                goalspec,
+                days_ahead=30
+            )
+
+            print(f"[TASK_GEN] ✅ Generated {len(tasks)} tasks for goal: {goalspec.title}")
+
+            if len(tasks) == 0:
+                print(f"[TASK_GEN] ⚠️ WARNING: 0 tasks generated for {goalspec.title}!")
+                print(f"[TASK_GEN] This usually means milestone generation failed or LLM returned empty response")
+
+        except Exception as e:
+            print(f"[TASK_GEN] ❌ ERROR generating tasks for {goalspec.title}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            tasks = []
 
         print(f"[OnboardingChat] Generated {len(tasks)} tasks for goal: {goalspec.title}")
 

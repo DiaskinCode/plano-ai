@@ -86,6 +86,12 @@ REQUIRED DATA (must extract):
 - target_role (job title they want)
 - timeline (when they want to achieve this)
 
+IMPORTANT DATA (must proactively ask about these):
+- work_history: Previous companies and roles (MUST ask: "What companies have you worked at?")
+- projects: Side projects, portfolio items with metrics (MUST ask: "What have you built?")
+- courses_certifications: Courses, certifications, bootcamps (MUST ask: "Any relevant courses or certifications?")
+- education_background: Degrees and schools (MUST ask: "What's your educational background?")
+
 OPTIONAL DATA (try to get at least 2):
 - current_role: Current job title
 - years_experience: Years in field
@@ -95,6 +101,15 @@ OPTIONAL DATA (try to get at least 2):
 - notable_achievements: Key projects or accomplishments
 - salary_expectation: Target compensation
 - location_preference: Remote, specific city, etc.
+
+PROACTIVE QUESTION FLOW:
+After getting basic info (target role, timeline), you MUST ask:
+1. "Walk me through your work history - what companies have you worked at and what did you do there?"
+2. "What have you built? Any side projects, open-source contributions, or portfolio pieces?"
+3. "Any relevant courses, certifications, or training programs you've completed?"
+4. "What's your educational background?"
+
+Do NOT wait for user to mention these - ASK EXPLICITLY!
 
 🎯 BACKGROUND DISCOVERY (CRITICAL - This makes your plan 10x better):
 
@@ -448,6 +463,50 @@ CRITICAL RULES:
                 "type": "string",
                 "description": "Preferred work location (city, remote, hybrid, etc.)"
             },
+            "work_history": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "company": {"type": "string", "description": "Company name"},
+                        "role": {"type": "string", "description": "Job title/role"},
+                        "duration": {"type": "string", "description": "Duration (e.g., '2020-2023' or '2 years')"},
+                        "description": {"type": "string", "description": "What they did, key achievements"}
+                    }
+                },
+                "description": "Previous work experience - companies, roles, duration, and key achievements. Example: [{'company': 'Google', 'role': 'Software Engineer', 'duration': '2020-2023', 'description': 'Built scalable microservices'}]"
+            },
+            "projects": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string", "description": "Project name"},
+                        "description": {"type": "string", "description": "What the project does"},
+                        "metrics": {"type": "string", "description": "Impact metrics (users, revenue, stars)"},
+                        "tech_stack": {"type": "array", "items": {"type": "string"}, "description": "Technologies used"}
+                    }
+                },
+                "description": "Side projects, portfolio items with metrics. Example: [{'name': 'E-commerce Platform', 'description': 'Full-stack marketplace', 'metrics': '50k users', 'tech_stack': ['React', 'Node.js']}]"
+            },
+            "courses_certifications": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Courses, certifications, bootcamps completed. Example: ['AWS Certified', 'CS50', 'Google UX Design Certificate']"
+            },
+            "education_background": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "degree": {"type": "string", "description": "Degree type and major"},
+                        "institution": {"type": "string", "description": "School/university name"},
+                        "year": {"type": "string", "description": "Graduation year"},
+                        "gpa": {"type": "string", "description": "GPA if mentioned"}
+                    }
+                },
+                "description": "Educational background. Example: [{'degree': 'BS Computer Science', 'institution': 'Stanford', 'year': '2020', 'gpa': '3.8'}]"
+            },
 
             # STUDY fields
             "degree_level": {
@@ -656,6 +715,8 @@ OPTIONAL_DATA = {
     'career': [
         'current_role', 'years_experience', 'tech_stack', 'design_tools',
         'target_companies', 'notable_achievements', 'salary_expectation', 'location_preference',
+        # Enhanced career data (MUST proactively ask about these)
+        'work_history', 'projects', 'courses_certifications', 'education_background',
         # Background discovery fields (CRITICAL for plan quality)
         'has_startup_background', 'startup_details', 'has_notable_achievements',
         'achievement_details', 'has_research_background', 'research_details', 'impressive_projects'

@@ -63,7 +63,9 @@ class OnboardingSerializer(serializers.ModelSerializer):
             'notable_projects', 'current_company',
             'design_discipline', 'design_tools', 'design_specialization', 'portfolio_quality',
             # Fitness
-            'fitness_level', 'injuries_limitations', 'gym_access', 'workout_history'
+            'fitness_level', 'injuries_limitations', 'gym_access', 'workout_history',
+            # NEW: Enhanced career data collection
+            'work_history', 'courses_certifications', 'projects', 'education_background'
         )
 
     def update(self, instance, validated_data):

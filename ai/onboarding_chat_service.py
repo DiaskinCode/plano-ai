@@ -256,6 +256,10 @@ class OnboardingChatService:
             'current_situation': "What's your current situation? (student/employed/unemployed)",
             'goal_type': "What's your career goal? (first job/switch role/promotion/career change)",
             'target_role': "What role are you targeting?",
+            'work_history': "What companies have you worked at? (roles and key accomplishments)",
+            'projects': "What have you built? (side projects, portfolio pieces with metrics)",
+            'courses_certifications': "Any relevant courses or certifications? (AWS, bootcamps, etc.)",
+            'education_background': "What's your educational background? (degrees, schools)",
 
             # Sport fields
             'fitness_goal_type': "What's your fitness goal? (lose weight/build muscle/run marathon/etc.)",
@@ -315,7 +319,18 @@ The more I know, the better plan I can create!"""
                 return "Perfect! When do you want to achieve this goal?"
             if 'current_situation' not in data or not data['current_situation']:
                 return "Thanks! Are you currently employed, studying, or looking for your first job?"
-            return "Great! Tell me more about your experience and skills."
+
+            # PROACTIVELY ask about work history, projects, courses, education
+            if 'work_history' not in data or not data['work_history']:
+                return "Great! Now let's capture your work history. What companies have you worked at? Tell me about your roles and what you accomplished there."
+            if 'projects' not in data or not data['projects']:
+                return "What have you built? Any side projects, open-source contributions, or portfolio pieces? (Include metrics if you have them - users, revenue, stars, etc.)"
+            if 'courses_certifications' not in data or not data['courses_certifications']:
+                return "Any relevant courses, certifications, or training programs you've completed? (e.g., AWS Certified, bootcamps, online courses)"
+            if 'education_background' not in data or not data['education_background']:
+                return "What's your educational background? (Degrees, schools, graduation years)"
+
+            return "Great! Tell me more about your target companies or any other preferences."
 
         elif self.category == 'study':
             if 'field_of_study' not in data or not data['field_of_study']:
@@ -646,6 +661,55 @@ The more I know, the better plan I can create!"""
             lines.append(f"✓ Current: {data['current_role']}")
             if data.get('years_experience'):
                 lines[-1] += f" with {data['years_experience']} years experience"
+
+        # Work history (show companies, not full details)
+        if data.get('work_history'):
+            companies = []
+            for job in data['work_history'][:3]:
+                if isinstance(job, dict) and job.get('company'):
+                    company_str = job['company']
+                    if job.get('role'):
+                        company_str += f" ({job['role']})"
+                    companies.append(company_str)
+                elif isinstance(job, str):
+                    companies.append(job)
+            if companies:
+                lines.append(f"✓ Work history: {', '.join(companies)}")
+
+        # Education background
+        if data.get('education_background'):
+            edu_list = []
+            for edu in data['education_background'][:2]:
+                if isinstance(edu, dict):
+                    edu_str = edu.get('degree', '')
+                    if edu.get('institution'):
+                        edu_str += f" - {edu['institution']}"
+                    edu_list.append(edu_str)
+                elif isinstance(edu, str):
+                    edu_list.append(edu)
+            if edu_list:
+                lines.append(f"✓ Education: {', '.join(edu_list)}")
+
+        # Courses and certifications
+        if data.get('courses_certifications'):
+            certs = data['courses_certifications'][:4]
+            if isinstance(certs, list):
+                certs_str = ', '.join([c if isinstance(c, str) else str(c) for c in certs])
+                lines.append(f"✓ Courses & Certs: {certs_str}")
+
+        # Projects with metrics
+        if data.get('projects'):
+            project_strs = []
+            for proj in data['projects'][:2]:
+                if isinstance(proj, dict):
+                    proj_str = proj.get('name', '')
+                    if proj.get('metrics'):
+                        proj_str += f" ({proj['metrics']})"
+                    project_strs.append(proj_str)
+                elif isinstance(proj, str):
+                    project_strs.append(proj)
+            if project_strs:
+                lines.append(f"✓ Projects: {', '.join(project_strs)}")
 
         if data.get('tech_stack'):
             tech = ', '.join(data['tech_stack'][:5])

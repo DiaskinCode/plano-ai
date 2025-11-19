@@ -71,33 +71,47 @@ class MilestoneGenerator:
             ]
         """
         logger.info(f"[MilestoneGenerator] Generating milestones for: {goalspec.title}")
+        print(f"[MILESTONE] ========== GENERATING MILESTONES ==========")
+        print(f"[MILESTONE] GoalSpec: {goalspec.title}")
+        print(f"[MILESTONE] Category: {goalspec.category}")
+        print(f"[MILESTONE] Timeline: {timeline_weeks} weeks")
 
         # Build comprehensive prompt
         prompt = self._build_milestone_prompt(goalspec, user_profile, context, timeline_weeks)
+        print(f"[MILESTONE] Prompt length: {len(prompt)} chars")
 
         # Generate with OpenAI
         try:
+            print(f"[MILESTONE] Calling OpenAI API...")
             response = self.ai_service.call_llm(
                 system_prompt="You are an expert career advisor that generates structured milestone plans in JSON format.",
                 user_prompt=prompt,
                 response_format="json"  # Force JSON output
             )
+            print(f"[MILESTONE] OpenAI response received, length: {len(response) if response else 0} chars")
 
             # Parse JSON response
             milestones = self._parse_milestone_response(response)
 
             if not milestones or len(milestones) < 3:
-                logger.warning(f"[MilestoneGenerator] Generated only {len(milestones)} milestones, expected 5")
+                logger.warning(f"[MilestoneGenerator] Generated only {len(milestones) if milestones else 0} milestones, expected 5")
+                print(f"[MILESTONE] ⚠️ Generated only {len(milestones) if milestones else 0} milestones!")
+                print(f"[MILESTONE] Response preview: {response[:500] if response else 'None'}...")
                 return []
 
             logger.info(f"[MilestoneGenerator] ✅ Generated {len(milestones)} milestones")
+            print(f"[MILESTONE] ✅ Generated {len(milestones)} milestones")
             for idx, milestone in enumerate(milestones, 1):
                 logger.info(f"  {idx}. {milestone['title']} ({milestone['duration_weeks']} weeks)")
+                print(f"[MILESTONE]   {idx}. {milestone['title']} ({milestone['duration_weeks']} weeks)")
 
             return milestones
 
         except Exception as e:
             logger.error(f"[MilestoneGenerator] Failed to generate milestones: {e}")
+            print(f"[MILESTONE] ❌ ERROR: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return []
 
     def _build_milestone_prompt(

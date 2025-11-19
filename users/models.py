@@ -158,6 +158,28 @@ class UserProfile(models.Model):
     target_companies = models.JSONField(default=list, blank=True, help_text='["Startups", "FAANG"] from conversational onboarding')
     years_experience = models.IntegerField(null=True, blank=True, help_text="Alias for years_of_experience for conversational onboarding compatibility")
 
+    # NEW: Enhanced Career Data Collection (work history, courses, projects, education)
+    work_history = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='[{"company": "Google", "role": "Software Engineer", "duration": "2020-2023", "description": "Built scalable systems"}]'
+    )
+    courses_certifications = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='["AWS Certified Solutions Architect", "CS50", "Stanford Machine Learning"]'
+    )
+    projects = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='[{"name": "E-commerce Platform", "description": "Full-stack app", "metrics": "50k users", "tech_stack": ["React", "Node.js"]}]'
+    )
+    education_background = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='[{"degree": "BS Computer Science", "institution": "Stanford University", "year": "2020", "gpa": "3.8"}]'
+    )
+
     # Fitness/Health
     fitness_level = models.CharField(max_length=50, blank=True, choices=[
         ('beginner', 'Beginner'),
