@@ -20,6 +20,21 @@ app.autodiscover_tasks()
 
 # Celery Beat Schedule (Periodic Tasks)
 app.conf.beat_schedule = {
+    # TASK REMINDERS - Critical for push notifications
+    'check-and-send-task-reminders': {
+        'task': 'notifications.tasks.check_and_send_task_reminders',
+        'schedule': 300.0,  # Every 5 minutes (300 seconds)
+        'options': {
+            'expires': 240,  # Expires after 4 minutes if not picked up
+        }
+    },
+    'check-and-send-deadline-notifications': {
+        'task': 'notifications.tasks.check_and_send_deadline_notifications',
+        'schedule': crontab(hour=8, minute=0),  # Daily at 8 AM
+        'options': {
+            'expires': 3600,
+        }
+    },
     'generate-weekly-reflections': {
         'task': 'analytics.generate_weekly_reflections',
         'schedule': crontab(day_of_week=0, hour=19, minute=0),  # Sunday 7 PM

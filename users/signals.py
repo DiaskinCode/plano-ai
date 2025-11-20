@@ -15,7 +15,7 @@ def create_notification_preferences(sender, instance, created, **kwargs):
         NotificationPreferences.objects.create(
             user=instance,
             task_reminders_enabled=True,
-            task_reminder_minutes_before=5,
+            task_reminder_minutes_before=15,  # 15 minutes before for useful reminders
             deadline_notifications_enabled=True,
             ai_motivation_enabled=True,
             daily_pulse_reminder_enabled=True

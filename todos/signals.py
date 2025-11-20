@@ -39,9 +39,23 @@ def set_reminder_time(sender, instance, created, **kwargs):
     if not instance.scheduled_time:
         return
 
-    # Get user's notification preferences
+    # Get user's notification preferences (create if doesn't exist)
+    from users.models import NotificationPreferences
+
     try:
-        prefs = instance.user.notification_preferences
+        prefs, created = NotificationPreferences.objects.get_or_create(
+            user=instance.user,
+            defaults={
+                'task_reminders_enabled': True,
+                'task_reminder_minutes_before': 15,
+                'deadline_notifications_enabled': True,
+                'ai_motivation_enabled': True,
+                'daily_pulse_reminder_enabled': True
+            }
+        )
+
+        if created:
+            logger.info(f"Created notification preferences for user {instance.user.id}")
 
         # Skip if user doesn't have task reminders enabled
         if not prefs.task_reminders_enabled:
@@ -49,9 +63,9 @@ def set_reminder_time(sender, instance, created, **kwargs):
 
         reminder_minutes = prefs.task_reminder_minutes_before
     except Exception as e:
-        # User doesn't have notification preferences yet, skip
-        logger.debug(f"No notification preferences for user {instance.user.id}: {e}")
-        return
+        # Fallback to default 15 minutes if there's any error
+        logger.warning(f"Error getting notification preferences for user {instance.user.id}: {e}, using default 15 minutes")
+        reminder_minutes = 15
 
     # Calculate scheduled datetime
     try:

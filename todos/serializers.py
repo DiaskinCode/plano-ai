@@ -103,7 +103,8 @@ class TodoListSerializer(serializers.ModelSerializer):
             'id', 'title', 'priority', 'scheduled_date', 'scheduled_time',
             'status', 'is_overdue', 'source',
             'task_type', 'timebox_minutes', 'deliverable_type',
-            'progress_percentage', 'goalspec', 'energy_level'
+            'progress_percentage', 'goalspec', 'energy_level',
+            'reminder_time'  # For local notification scheduling
         )
 
 
@@ -145,11 +146,15 @@ class AtomicTaskSerializer(serializers.ModelSerializer):
             'is_overdue', 'days_overdue', 'is_blocked_status',
 
             # Timestamps
-            'created_at', 'updated_at'
+            'created_at', 'updated_at',
+
+            # Notifications
+            'reminder_time'  # For local notification scheduling
         )
         read_only_fields = (
             'created_at', 'updated_at', 'completed_at', 'skipped_at',
-            'is_overdue', 'days_overdue', 'progress_percentage', 'is_blocked_status'
+            'is_overdue', 'days_overdue', 'progress_percentage', 'is_blocked_status',
+            'reminder_time'
         )
 
     def get_is_blocked_status(self, obj):
