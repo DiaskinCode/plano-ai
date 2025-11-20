@@ -51,13 +51,17 @@ class TaskExecutor:
         from ai.atomic_task_generator import create_atomic_task_generator
         from ai.atomic_validator import create_atomic_validator
         from ai.task_enricher import create_task_enricher
+        from ai.story_extractor import create_story_extractor
+        from ai.task_verifier import create_task_verifier
 
         self.milestone_gen = create_milestone_generator()
         self.atomic_gen = create_atomic_task_generator()
         self.validator = create_atomic_validator()
         self.enricher = create_task_enricher(use_web_research=True)  # Phase 3: Enrichment
+        self.story_extractor = create_story_extractor()  # Phase 3: Story extraction
+        self.task_verifier = create_task_verifier()  # Phase 3: Quality verification
 
-        logger.info("[TaskExecutor] Initialized with two-tier generation + enrichment system")
+        logger.info("[TaskExecutor] Initialized with two-tier generation + stories + verification system")
 
     def execute_with_milestones(
         self,
@@ -81,13 +85,19 @@ class TaskExecutor:
         # Calculate timeline in weeks
         timeline_weeks = max(4, days_ahead // 7)
 
+        # === PHASE 0: EXTRACT USER STORIES ===
+        logger.info(f"\n[TaskExecutor] === PHASE 0: STORY EXTRACTION ===")
+        self.user_stories = self.story_extractor.extract_stories(self.profile, goalspec)
+        logger.info(f"[TaskExecutor] ✅ Extracted {len(self.user_stories)} user stories for personalization")
+
         # === TIER 1: GENERATE MILESTONES ===
         logger.info(f"\n[TaskExecutor] === TIER 1: MILESTONE GENERATION ===")
         milestones = self.milestone_gen.generate_milestones(
             goalspec=goalspec,
             user_profile=self.profile,
             context=self.context,
-            timeline_weeks=timeline_weeks
+            timeline_weeks=timeline_weeks,
+            user_stories=self.user_stories
         )
 
         if not milestones:
@@ -109,7 +119,8 @@ class TaskExecutor:
                 milestone=milestone,
                 goalspec=goalspec,
                 user_profile=self.profile,
-                context=self.context
+                context=self.context,
+                user_stories=self.user_stories
             )
 
             if atomic_tasks:
@@ -150,6 +161,16 @@ class TaskExecutor:
         )
         enriched_count = sum(1 for t in all_tasks if t.get('enriched', False))
         logger.info(f"[TaskExecutor] ✅ Enriched {enriched_count}/{len(all_tasks)} tasks with real URLs and data")
+
+        # === PHASE 4: VERIFY & FIX TASKS ===
+        logger.info(f"\n[TaskExecutor] === PHASE 4: QUALITY VERIFICATION ===")
+        tasks_before_verify = len(all_tasks)
+        all_tasks = self.task_verifier.verify_and_fix(
+            tasks=all_tasks,
+            context=self.context,
+            user_stories=self.user_stories
+        )
+        logger.info(f"[TaskExecutor] ✅ Verified {len(all_tasks)}/{tasks_before_verify} tasks passed quality checks")
 
         # === VALIDATION: ENSURE ATOMICITY ===
         logger.info(f"\n[TaskExecutor] === VALIDATION: ATOMICITY CHECK ===")

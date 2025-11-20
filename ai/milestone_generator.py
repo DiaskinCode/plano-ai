@@ -38,16 +38,17 @@ class MilestoneGenerator:
         """Initialize with OpenAI service"""
         from ai.services import AIService
 
-        # Use OpenAI GPT-4o-mini (5-8x cheaper than Claude)
+        # Use OpenAI GPT-4o for high-quality personalization
         self.ai_service = AIService(provider='openai')
-        logger.info("[MilestoneGenerator] Initialized with GPT-4o-mini")
+        logger.info("[MilestoneGenerator] Initialized with GPT-4o")
 
     def generate_milestones(
         self,
         goalspec,
         user_profile,
         context: Dict[str, Any],
-        timeline_weeks: int = 12
+        timeline_weeks: int = 12,
+        user_stories: Dict[str, str] = None
     ) -> List[Dict[str, Any]]:
         """
         Generate 5 high-level milestones for the goal.
@@ -77,7 +78,7 @@ class MilestoneGenerator:
         print(f"[MILESTONE] Timeline: {timeline_weeks} weeks")
 
         # Build comprehensive prompt
-        prompt = self._build_milestone_prompt(goalspec, user_profile, context, timeline_weeks)
+        prompt = self._build_milestone_prompt(goalspec, user_profile, context, timeline_weeks, user_stories)
         print(f"[MILESTONE] Prompt length: {len(prompt)} chars")
 
         # Generate with OpenAI
@@ -119,7 +120,8 @@ class MilestoneGenerator:
         goalspec,
         user_profile,
         context: Dict[str, Any],
-        timeline_weeks: int
+        timeline_weeks: int,
+        user_stories: Dict[str, str] = None
     ) -> str:
         """Build comprehensive prompt for milestone generation"""
 
@@ -135,6 +137,23 @@ class MilestoneGenerator:
         target_companies = context.get('target_companies_string', context.get('target_companies', 'N/A'))
         current_company = context.get('current_company', 'N/A')
         current_role = context.get('current_role', 'N/A')
+
+        # Build user stories section if available
+        stories_section = ""
+        if user_stories:
+            stories_section = f"""
+USER'S STORY (BUILD MILESTONES ON THIS):
+=========================================
+Work Experience: {user_stories.get('work_story', 'N/A')}
+Key Achievement: {user_stories.get('achievement_story', 'N/A')}
+Network: {user_stories.get('network_story', 'N/A')}
+Challenge: {user_stories.get('challenge_story', 'N/A')}
+Aspiration: {user_stories.get('aspiration_story', 'N/A')}
+
+CRITICAL: Each milestone MUST reference specific elements from their story above.
+Example: If work_story mentions "21 financial reports at Forte Finance",
+then milestone should be "Leverage Your Forte Finance Reporting Experience for Audit Transition"
+"""
 
         prompt = f"""You are an expert career advisor. Generate a 5-milestone plan for this user's goal.
 
@@ -155,6 +174,7 @@ Work Experience: {work_experience} years
 Key Achievements: {context.get('achievements', 'None reported')}
 Startup Experience: {context.get('startup_experience', 'None')}
 Notable Projects: {context.get('notable_achievements', 'None')}
+{stories_section}
 
 TASK:
 =====

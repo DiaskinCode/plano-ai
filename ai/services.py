@@ -23,7 +23,7 @@ class AIService:
         if self.provider == 'openai':
             import openai
             self.client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-            self.model = 'gpt-4o-mini'
+            self.model = 'gpt-4o'  # Upgraded from gpt-4o-mini for better personalization
         elif self.provider == 'anthropic':
             import anthropic
             self.client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)

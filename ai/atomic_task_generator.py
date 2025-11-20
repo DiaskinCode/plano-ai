@@ -39,16 +39,17 @@ class AtomicTaskGenerator:
         """Initialize with OpenAI service"""
         from ai.services import AIService
 
-        # Use OpenAI GPT-4o-mini (5-8x cheaper than Claude)
+        # Use OpenAI GPT-4o for high-quality personalization
         self.ai_service = AIService(provider='openai')
-        logger.info("[AtomicTaskGenerator] Initialized with GPT-4o-mini")
+        logger.info("[AtomicTaskGenerator] Initialized with GPT-4o")
 
     def generate_atomic_tasks(
         self,
         milestone: Dict[str, Any],
         goalspec,
         user_profile,
-        context: Dict[str, Any]
+        context: Dict[str, Any],
+        user_stories: Dict[str, str] = None
     ) -> List[Dict[str, Any]]:
         """
         Generate 5-6 atomic tasks for a milestone.
@@ -78,7 +79,7 @@ class AtomicTaskGenerator:
         logger.info(f"[AtomicTaskGenerator] Breaking down milestone: {milestone['title'][:60]}...")
 
         # Build atomic task prompt
-        prompt = self._build_atomic_prompt(milestone, goalspec, user_profile, context)
+        prompt = self._build_atomic_prompt(milestone, goalspec, user_profile, context, user_stories)
 
         # Generate with OpenAI
         try:
@@ -110,7 +111,8 @@ class AtomicTaskGenerator:
         milestone: Dict[str, Any],
         goalspec,
         user_profile,
-        context: Dict[str, Any]
+        context: Dict[str, Any],
+        user_stories: Dict[str, str] = None
     ) -> str:
         """Build prompt that enforces atomicity"""
 
@@ -127,6 +129,24 @@ class AtomicTaskGenerator:
         current_role = context.get('current_role', 'N/A')
         startup_experience = context.get('startup_experience', 'None')
         notable_achievements = context.get('notable_achievements', 'None')
+
+        # Build user stories section if available
+        stories_section = ""
+        if user_stories:
+            stories_section = f"""
+USER'S STORY (EVERY TASK MUST BUILD ON THIS):
+==============================================
+Work Experience: {user_stories.get('work_story', 'N/A')}
+Key Achievement: {user_stories.get('achievement_story', 'N/A')}
+Network: {user_stories.get('network_story', 'N/A')}
+Challenge: {user_stories.get('challenge_story', 'N/A')}
+Aspiration: {user_stories.get('aspiration_story', 'N/A')}
+
+CRITICAL: Each task MUST reference specific elements from their story.
+Example: If work_story = "Built 21 financial reports at Forte Finance",
+Task should be: "Create doc comparing YOUR 21 Forte Finance reports vs KPMG audit work papers"
+NOT: "Research audit methodology" (too generic)
+"""
 
         prompt = f"""You are an expert task breakdown specialist. Break this milestone into 5-6 ATOMIC tasks.
 
@@ -149,6 +169,7 @@ Target Companies: {target_companies}
 Target Universities: {target_unis_str}
 Startup Experience: {startup_experience}
 Notable Achievements: {notable_achievements}
+{stories_section}
 
 CRITICAL: ATOMIC TASK REQUIREMENTS
 ===================================
