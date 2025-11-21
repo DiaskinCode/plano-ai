@@ -104,7 +104,7 @@ class AIService:
                 ]
             }
 
-        return response.choices[0].message.content
+        return response.choices[0].message.content or ''
 
     def _call_anthropic(self, system_prompt: str, user_prompt: str = None, response_format: str = 'text', messages: list = None) -> str:
         """Call Anthropic API

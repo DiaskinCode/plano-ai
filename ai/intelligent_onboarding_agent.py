@@ -242,15 +242,22 @@ Extract from the user message above:
 
         response = self.ai_service.call_llm(
             system_prompt="You are a data extraction system. Return only valid JSON.",
-            user_prompt=prompt
+            user_prompt=prompt,
+            response_format='json'
         )
 
         try:
+            # Handle None or empty response
+            if not response:
+                print(f"[IntelligentAgent] Extraction returned empty response")
+                return {}
+
             data = json.loads(response)
             # Clean null/empty values
             return {k: v for k, v in data.items() if v is not None and v != ''}
         except Exception as e:
             print(f"[IntelligentAgent] Extraction failed: {e}")
+            print(f"[IntelligentAgent] Response was: {response}")
             return {}
 
     def _answer_question_and_continue(
