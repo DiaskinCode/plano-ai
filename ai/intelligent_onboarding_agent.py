@@ -329,23 +329,22 @@ What you know about user:
 User just said:
 "{user_message}"
 
-Next missing field: {next_field}
+CRITICAL RULES:
+1. ACCEPT their answer AS IS - do NOT ask for clarification or more details about what they just said
+2. IMMEDIATELY move to the next field: {next_field}
+3. Keep response SHORT (2-3 sentences max)
+
+WRONG: "ML Engineer - that's great! What specific type of ML role?"
+RIGHT: "ML Engineer - got it! How many years of experience do you have?"
+
+WRONG: "Computer Science - nice! What area of CS interests you most?"
+RIGHT: "Computer Science - perfect! What country are you targeting for your studies?"
 
 Your task:
-1. Acknowledge what they just shared (be specific!)
-2. Ask about the next missing field: {next_field}
-3. Keep it natural and conversational
+1. Brief acknowledgment (1 sentence, no follow-up questions about what they said)
+2. Ask about the DIFFERENT field: {next_field}
 
-Example:
-User: "NYU, Stanford, and MIT"
-You know: {{"target_schools": ["NYU", "Stanford", "MIT"]}}
-Next field: budget
-
-Response: "Excellent choices - NYU, Stanford, and MIT are all top-tier!
-
-What's your budget per year? This helps me understand your financial constraints."
-
-Generate natural response:
+Generate response (DO NOT ask clarifying questions about their answer):
 """
 
         return self.ai_service.call_llm(
@@ -369,24 +368,20 @@ Generate natural response:
         return None
 
     def _get_required_fields(self) -> List[str]:
-        """Get required fields for category."""
+        """Get required fields for category - MINIMAL set for fast onboarding."""
 
         if self.category == 'study':
             return [
                 'field_of_study',
                 'degree_level',
                 'target_country',
-                'budget',
-                'timeline',
-                'gpa',
-                'test_scores'
+                'timeline'
             ]
         elif self.category == 'career':
             return [
                 'target_role',
                 'current_situation',
-                'timeline',
-                'years_experience'
+                'timeline'
             ]
         else:
             return ['goal_type', 'timeline']
@@ -430,10 +425,10 @@ Generate natural response:
 
         required = self._get_required_fields()
 
-        # Check if at least 70% of required fields are filled
+        # Check if at least 50% of required fields are filled (fast onboarding)
         filled = sum(1 for f in required if f in extracted_data and extracted_data[f])
 
-        return filled >= len(required) * 0.7
+        return filled >= len(required) * 0.5
 
     def _generate_confirmation(self, data: Dict) -> str:
         """Generate confirmation message."""
