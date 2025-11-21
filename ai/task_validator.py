@@ -24,6 +24,9 @@ Week 1 Day 6-7: Quality gate before tasks reach user.
 
 from typing import Dict, Tuple, List, Any
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TaskValidator:
@@ -315,6 +318,153 @@ class TaskValidator:
             'average_score': average_score,
             'failed_tasks': failed_tasks
         }
+
+    # ========== FAST PRE-VALIDATION METHODS (0 LLM calls) ==========
+
+    # Meta-task patterns indicating non-atomic tasks
+    META_TASK_PATTERNS = [
+        r'\band\b.*\band\b',  # Multiple "and"s
+        r'\bthen\b',
+        r'\bfollowed by\b',
+        r'\bafter that\b',
+        r'\bnext\b.*\bthen\b',
+        r'\bstep \d+\b',
+        r'\bphase \d+\b',
+        r'\bfirst\b.*\bthen\b.*\bfinally\b',
+    ]
+
+    # Specific indicators - task has concrete details
+    SPECIFIC_PATTERNS = [
+        r'https?://\S+',  # URLs
+        r'\b[A-Z][a-z]+\s+[A-Z][a-z]+\b',  # Proper names (First Last)
+        r'\b(?:Google|Microsoft|Apple|Amazon|Meta|Netflix|Stanford|MIT|Harvard|NYU)\b',
+        r'\bpage(?:s)?\s+\d+',  # Page numbers
+        r'\bchapter\s+\d+',  # Chapter numbers
+        r'@\w+\.\w+',  # Email addresses
+        r'\b\d{4}\s+report\b',  # Year reports (2024 report)
+    ]
+
+    def validate_and_fix_batch(
+        self,
+        tasks: List[Dict[str, Any]]
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """
+        Fast pre-validation and auto-fix with 0 LLM calls.
+
+        Returns:
+            Tuple of (valid_tasks, rejected_tasks)
+        """
+        valid_tasks = []
+        rejected_tasks = []
+        fixed_count = 0
+
+        for task in tasks:
+            # First try to fix simple issues
+            fixed_task = self.fix_simple_issues(task)
+            if fixed_task != task:
+                fixed_count += 1
+                task = fixed_task
+
+            # Then validate with quick check
+            is_valid, issues = self.quick_validate(task)
+
+            if is_valid:
+                valid_tasks.append(task)
+            else:
+                task['validation_issues'] = issues
+                rejected_tasks.append(task)
+
+        logger.info(f"[TaskValidator] Pre-validation: {len(valid_tasks)} valid, "
+                   f"{len(rejected_tasks)} rejected, {fixed_count} auto-fixed")
+
+        return valid_tasks, rejected_tasks
+
+    def quick_validate(self, task: Dict[str, Any]) -> Tuple[bool, List[str]]:
+        """
+        Quick validation with rule-based checks (0 LLM calls).
+
+        More lenient than full validation - just catches obvious issues.
+
+        Returns:
+            Tuple of (is_valid, list_of_issues)
+        """
+        issues = []
+        title = task.get('title', '')
+        description = task.get('description', '')
+        timebox = task.get('timebox_minutes', 30)
+        full_text = f"{title} {description}".lower()
+
+        # Check 1: Title length
+        if len(title) < 10:
+            issues.append("Title too short (< 10 chars)")
+        if len(title) > 150:
+            issues.append("Title too long (> 150 chars)")
+
+        # Check 2: Timebox range
+        if timebox < 10:
+            issues.append(f"Timebox too short ({timebox} min < 10 min)")
+        if timebox > 120:
+            issues.append(f"Timebox too long ({timebox} min > 120 min)")
+
+        # Check 3: Meta-task patterns (non-atomic)
+        for pattern in self.META_TASK_PATTERNS:
+            if re.search(pattern, full_text, re.IGNORECASE):
+                issues.append(f"Contains meta-task pattern: {pattern}")
+                break  # One is enough
+
+        # Check if has specific resource (makes task more likely valid)
+        has_specific = any(re.search(p, f"{title} {description}", re.IGNORECASE)
+                         for p in self.SPECIFIC_PATTERNS)
+
+        # More lenient - only reject if has multiple issues AND no specifics
+        is_valid = len(issues) == 0 or (len(issues) == 1 and has_specific)
+
+        return is_valid, issues
+
+    def fix_simple_issues(self, task: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Auto-fix simple issues without LLM.
+
+        Fixes:
+        - Timebox capping (15-60 min)
+        - Title trimming
+        - Remove common filler words
+        """
+        task = task.copy()
+
+        # Fix timebox
+        timebox = task.get('timebox_minutes', 30)
+        if timebox < 10:
+            task['timebox_minutes'] = 15  # Minimum 15 min
+        elif timebox > 90:
+            task['timebox_minutes'] = 60  # Cap at 60 min
+
+        # Fix title
+        title = task.get('title', '')
+
+        # Trim whitespace
+        title = ' '.join(title.split())
+
+        # Remove common filler starts
+        filler_starts = [
+            'Task: ', 'Action: ', 'TODO: ', 'Do: ',
+            'Complete: ', 'Finish: ', 'Work on: '
+        ]
+        for filler in filler_starts:
+            if title.startswith(filler):
+                title = title[len(filler):]
+
+        # Capitalize first letter
+        if title and title[0].islower():
+            title = title[0].upper() + title[1:]
+
+        # Truncate if too long
+        if len(title) > 120:
+            title = title[:117] + '...'
+
+        task['title'] = title
+
+        return task
 
 
 # Singleton instance

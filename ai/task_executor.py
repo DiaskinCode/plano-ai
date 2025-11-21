@@ -53,15 +53,17 @@ class TaskExecutor:
         from ai.task_enricher import create_task_enricher
         from ai.story_extractor import create_story_extractor
         from ai.task_verifier import create_task_verifier
+        from ai.task_validator import create_task_validator
 
         self.milestone_gen = create_milestone_generator()
         self.atomic_gen = create_atomic_task_generator()
         self.validator = create_atomic_validator()
         self.enricher = create_task_enricher(use_web_research=True)  # Phase 3: Enrichment
         self.story_extractor = create_story_extractor()  # Phase 3: Story extraction
-        self.task_verifier = create_task_verifier()  # Phase 3: Quality verification
+        self.task_verifier = create_task_verifier()  # Phase 3: Quality verification (now batch)
+        self.task_validator = create_task_validator(context)  # Phase 3: Pre-validation (0 LLM calls)
 
-        logger.info("[TaskExecutor] Initialized with two-tier generation + stories + verification system")
+        logger.info("[TaskExecutor] Initialized with two-tier generation + optimized batch verification")
 
     def execute_with_milestones(
         self,
@@ -162,15 +164,23 @@ class TaskExecutor:
         enriched_count = sum(1 for t in all_tasks if t.get('enriched', False))
         logger.info(f"[TaskExecutor] ✅ Enriched {enriched_count}/{len(all_tasks)} tasks with real URLs and data")
 
-        # === PHASE 4: VERIFY & FIX TASKS ===
-        logger.info(f"\n[TaskExecutor] === PHASE 4: QUALITY VERIFICATION ===")
+        # === PHASE 3.5: PRE-VALIDATION (0 LLM calls) ===
+        logger.info(f"\n[TaskExecutor] === PHASE 3.5: PRE-VALIDATION (rule-based) ===")
+        tasks_before_prevalidation = len(all_tasks)
+        all_tasks, rejected_tasks = self.task_validator.validate_and_fix_batch(all_tasks)
+        if rejected_tasks:
+            logger.info(f"[TaskExecutor] Pre-validation rejected {len(rejected_tasks)} tasks (auto-fixed others)")
+        logger.info(f"[TaskExecutor] ✅ Pre-validation: {len(all_tasks)}/{tasks_before_prevalidation} tasks passed")
+
+        # === PHASE 4: BATCH VERIFY & FIX TASKS (2 LLM calls) ===
+        logger.info(f"\n[TaskExecutor] === PHASE 4: BATCH QUALITY VERIFICATION ===")
         tasks_before_verify = len(all_tasks)
         all_tasks = self.task_verifier.verify_and_fix(
             tasks=all_tasks,
             context=self.context,
             user_stories=self.user_stories
         )
-        logger.info(f"[TaskExecutor] ✅ Verified {len(all_tasks)}/{tasks_before_verify} tasks passed quality checks")
+        logger.info(f"[TaskExecutor] ✅ Batch verified {len(all_tasks)}/{tasks_before_verify} tasks passed quality checks")
 
         # === VALIDATION: ENSURE ATOMICITY ===
         logger.info(f"\n[TaskExecutor] === VALIDATION: ATOMICITY CHECK ===")

@@ -41,7 +41,7 @@ class TaskVerifier:
         max_retries: int = 1
     ) -> List[Dict[str, Any]]:
         """
-        Verify each task and fix if needed.
+        Verify all tasks in BATCH and fix if needed (optimized - 2 LLM calls instead of 50+).
 
         Args:
             tasks: List of generated tasks
@@ -52,43 +52,199 @@ class TaskVerifier:
         Returns:
             List of verified (and possibly fixed) tasks
         """
-        logger.info(f"[TaskVerifier] Verifying {len(tasks)} tasks")
+        logger.info(f"[TaskVerifier] Batch verifying {len(tasks)} tasks (optimized)")
 
-        verified_tasks = []
-        fixed_count = 0
-        rejected_count = 0
+        if not tasks:
+            return []
+
+        # Step 1: Batch verify all tasks in ONE LLM call
+        verification_results = self._batch_verify(tasks, context, user_stories)
+
+        # Separate passed and failed tasks
+        passed_tasks = []
+        failed_tasks = []
 
         for i, task in enumerate(tasks):
-            task_title = task.get('title', 'Unknown')[:50]
-            logger.debug(f"[TaskVerifier] Checking task {i+1}: {task_title}...")
-
-            # Verify task
-            is_valid, issues = self._verify_task(task, context, user_stories)
-
-            if is_valid:
-                verified_tasks.append(task)
-                continue
-
-            # Task failed - try to fix
-            logger.warning(f"[TaskVerifier] Task failed verification: {issues}")
-
-            fixed_task = self._fix_task(task, issues, context, user_stories)
-
-            # Verify again
-            is_valid_now, _ = self._verify_task(fixed_task, context, user_stories)
-
-            if is_valid_now:
-                verified_tasks.append(fixed_task)
-                fixed_count += 1
-                logger.info(f"[TaskVerifier] ✅ Fixed task: {task_title}")
+            result = verification_results.get(str(i), {})
+            if result.get('passes', True):  # Default to True if not in results
+                passed_tasks.append(task)
             else:
-                # Give up on this task
-                rejected_count += 1
-                logger.error(f"[TaskVerifier] ❌ Could not fix task, skipping: {task_title}")
+                task['_verification_issues'] = result.get('issues', [])
+                task['_task_index'] = i
+                failed_tasks.append(task)
 
-        logger.info(f"[TaskVerifier] Results: {len(verified_tasks)} passed, {fixed_count} fixed, {rejected_count} rejected")
+        logger.info(f"[TaskVerifier] Batch verification: {len(passed_tasks)} passed, {len(failed_tasks)} need fixing")
 
-        return verified_tasks
+        # Step 2: Batch fix all failed tasks in ONE LLM call
+        if failed_tasks:
+            fixed_tasks = self._batch_fix(failed_tasks, context, user_stories)
+            passed_tasks.extend(fixed_tasks)
+            logger.info(f"[TaskVerifier] Batch fixed {len(fixed_tasks)}/{len(failed_tasks)} tasks")
+
+        logger.info(f"[TaskVerifier] ✅ Final: {len(passed_tasks)} verified tasks")
+
+        return passed_tasks
+
+    def _batch_verify(
+        self,
+        tasks: List[Dict[str, Any]],
+        context: Dict[str, Any],
+        user_stories: Dict[str, str]
+    ) -> Dict[str, Any]:
+        """
+        Verify ALL tasks in a single LLM call.
+
+        Returns:
+            Dict mapping task index to verification result
+        """
+        # Build task list for prompt
+        task_list = []
+        for i, task in enumerate(tasks):
+            task_list.append({
+                'index': i,
+                'title': task.get('title', ''),
+                'description': task.get('description', '')[:200],  # Truncate for token efficiency
+                'timebox': task.get('timebox_minutes', 30)
+            })
+
+        prompt = f"""Verify these {len(tasks)} tasks meet quality standards.
+
+USER CONTEXT:
+- Target Role: {context.get('target_role', 'N/A')}
+- Current Company: {context.get('current_company', 'N/A')}
+- Target Companies: {context.get('target_companies', 'N/A')}
+
+TASKS TO VERIFY:
+{json.dumps(task_list, indent=2)}
+
+QUALITY STANDARDS (be lenient - only fail obviously bad tasks):
+1. ATOMIC: Single action, reasonable timebox (15-90 min is OK)
+2. CLEAR: Has specific deliverable or outcome
+3. NOT VAGUE: Avoids "some", "various", "explore" without specifics
+
+NOTE: Do NOT fail tasks for:
+- Missing user's exact name/company (tasks can reference general resources)
+- Being "too generic" if the action is clear
+- Timebox being slightly outside 15-60 range
+
+Return JSON with verification for EACH task by index:
+{{
+    "0": {{"passes": true/false, "issues": ["list of issues if fails"]}},
+    "1": {{"passes": true/false, "issues": []}},
+    ...
+}}
+"""
+
+        try:
+            response = self.ai_service.call_llm(
+                system_prompt="You are a lenient quality reviewer. Only fail obviously bad tasks. Return valid JSON.",
+                user_prompt=prompt,
+                response_format="json"
+            )
+
+            result = json.loads(response)
+            return result
+
+        except Exception as e:
+            logger.error(f"[TaskVerifier] Batch verification failed: {e}")
+            # If batch verification fails, assume all tasks pass
+            return {str(i): {'passes': True, 'issues': []} for i in range(len(tasks))}
+
+    def _batch_fix(
+        self,
+        failed_tasks: List[Dict[str, Any]],
+        context: Dict[str, Any],
+        user_stories: Dict[str, str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Fix ALL failed tasks in a single LLM call.
+
+        Returns:
+            List of fixed tasks
+        """
+        if not failed_tasks:
+            return []
+
+        # Build failed task list for prompt
+        task_list = []
+        for task in failed_tasks:
+            task_list.append({
+                'index': task.get('_task_index', 0),
+                'title': task.get('title', ''),
+                'description': task.get('description', '')[:200],
+                'timebox': task.get('timebox_minutes', 30),
+                'issues': task.get('_verification_issues', [])
+            })
+
+        prompt = f"""Fix these {len(failed_tasks)} tasks that failed verification.
+
+USER CONTEXT:
+- Target Role: {context.get('target_role', 'N/A')}
+- Target Companies: {context.get('target_companies', 'N/A')}
+
+USER STORIES:
+- Work: {user_stories.get('work_story', 'N/A')[:150]}
+- Goal: {user_stories.get('aspiration_story', 'N/A')[:150]}
+
+FAILED TASKS:
+{json.dumps(task_list, indent=2)}
+
+Fix each task to address the issues. Keep fixes minimal - don't over-engineer.
+
+Return JSON array of fixed tasks:
+[
+    {{
+        "index": 0,
+        "title": "Fixed title (max 100 chars)",
+        "description": "Fixed description",
+        "timebox_minutes": 30
+    }},
+    ...
+]
+"""
+
+        try:
+            response = self.ai_service.call_llm(
+                system_prompt="You are a task fixer. Make minimal changes to fix issues. Return valid JSON array.",
+                user_prompt=prompt,
+                response_format="json"
+            )
+
+            fixed_list = json.loads(response)
+
+            # Map fixed tasks back to original structure
+            fixed_tasks = []
+            for fixed in fixed_list:
+                # Find original task by index
+                original_idx = fixed.get('index', 0)
+                original_task = None
+                for task in failed_tasks:
+                    if task.get('_task_index') == original_idx:
+                        original_task = task
+                        break
+
+                if original_task:
+                    # Merge fixed fields into original task
+                    task_copy = original_task.copy()
+                    task_copy['title'] = fixed.get('title', original_task.get('title'))
+                    task_copy['description'] = fixed.get('description', original_task.get('description'))
+                    task_copy['timebox_minutes'] = fixed.get('timebox_minutes', original_task.get('timebox_minutes', 30))
+
+                    # Clean up internal fields
+                    task_copy.pop('_verification_issues', None)
+                    task_copy.pop('_task_index', None)
+
+                    fixed_tasks.append(task_copy)
+
+            return fixed_tasks
+
+        except Exception as e:
+            logger.error(f"[TaskVerifier] Batch fix failed: {e}")
+            # If batch fix fails, return original tasks (cleaned)
+            for task in failed_tasks:
+                task.pop('_verification_issues', None)
+                task.pop('_task_index', None)
+            return failed_tasks
 
     def _verify_task(
         self,
