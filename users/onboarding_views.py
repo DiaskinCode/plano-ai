@@ -555,17 +555,23 @@ def onboarding_status(request):
         user = request.user
         profile = user.profile
 
-        # Check if onboarding is completed
-        if profile.onboarding_completed:
-            return Response({
-                'needs_onboarding': False,
-                'is_complete': True,
-                'completed_categories': []
-            })
+        print(f"[OnboardingStatus] User: {user.id} - {user.email}")
+        print(f"[OnboardingStatus] Profile onboarding_completed: {profile.onboarding_completed}")
 
         # Get list of completed categories from OnboardingChatData
         completed_chat_data = OnboardingChatData.objects.filter(user=user)
         completed_categories = [data.category for data in completed_chat_data]
+
+        print(f"[OnboardingStatus] Found {len(completed_categories)} completed categories: {completed_categories}")
+
+        # Check if onboarding is completed
+        if profile.onboarding_completed:
+            # Even if profile is marked complete, return the categories that were completed
+            return Response({
+                'needs_onboarding': False,
+                'is_complete': True,
+                'completed_categories': completed_categories  # Return actual categories, not empty
+            })
 
         return Response({
             'needs_onboarding': True,
@@ -608,23 +614,32 @@ def onboarding_chat_complete(request):
     category = request.data.get('category')
     extracted_data = request.data.get('extracted_data', {})
 
-    if not category or not extracted_data:
+    # Only require category - extracted_data can be empty if agent failed to extract
+    if not category:
+        print(f"[OnboardingChatComplete] ERROR: Missing category")
         return Response(
-            {'error': 'Category and extracted_data are required'},
+            {'error': 'Category is required'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # Warn but don't fail if extracted_data is empty
+    if not extracted_data:
+        print(f"[OnboardingChatComplete] WARNING: extracted_data is empty for {category}")
+
     try:
         user = request.user
+        print(f"[OnboardingChatComplete] User: {user.id} - {user.email}")
+        print(f"[OnboardingChatComplete] Category: {category}")
+        print(f"[OnboardingChatComplete] Extracted data keys: {list(extracted_data.keys())}")
 
         # Save extracted data to OnboardingChatData
-        chat_data, _ = OnboardingChatData.objects.update_or_create(
+        chat_data, created = OnboardingChatData.objects.update_or_create(
             user=user,
             category=category,
             defaults={'extracted_data': extracted_data, 'is_merged': False}
         )
 
-        print(f"[OnboardingChat] Saved data for category '{category}'")
+        print(f"[OnboardingChatComplete] {'Created' if created else 'Updated'} OnboardingChatData for '{category}'")
 
         return Response({
             'status': 'saved',
