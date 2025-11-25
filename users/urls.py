@@ -31,6 +31,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('delete-account/', delete_account, name='delete_account'),
+    path('delete-account', delete_account, name='delete_account_no_slash'),  # Support without trailing slash
     path('onboarding/', OnboardingView.as_view(), name='onboarding'),
     # New onboarding endpoints
     path('onboarding/research-path/', research_path, name='research_path'),

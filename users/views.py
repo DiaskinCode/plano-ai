@@ -156,16 +156,23 @@ def delete_account(request):
     Delete the authenticated user's account and all associated data.
     This action is irreversible.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     user = request.user
+    logger.info(f'Delete account request for user: {user.email}')
 
     try:
         # Delete the user (this will cascade delete all related data)
+        user_email = user.email
         user.delete()
+        logger.info(f'Successfully deleted account for user: {user_email}')
 
         return Response({
             'message': 'Account deleted successfully'
         }, status=status.HTTP_200_OK)
     except Exception as e:
+        logger.error(f'Failed to delete account for user {user.email}: {str(e)}', exc_info=True)
         return Response({
             'error': f'Failed to delete account: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
