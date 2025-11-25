@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, LoginView, ProfileView, OnboardingView, performance_insights
+from .views import RegisterView, LoginView, ProfileView, OnboardingView, performance_insights, delete_account
 from .goalspec_views import GoalSpecViewSet
 from .onboarding_views import (
     research_path,
@@ -30,6 +30,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('delete-account/', delete_account, name='delete_account'),
     path('onboarding/', OnboardingView.as_view(), name='onboarding'),
     # New onboarding endpoints
     path('onboarding/research-path/', research_path, name='research_path'),

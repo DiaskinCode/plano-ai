@@ -9,7 +9,10 @@ ENV/
 .env
 .env.local
 .env.*.local
+
+# Documentation and AI assistant files
 *.md
+.claude/
 # Python
 __pycache__/
 *.py[cod]

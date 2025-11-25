@@ -36,4 +36,4 @@ RUN python manage.py collectstatic --noinput || true
 EXPOSE 8000
 
 # Run migrations and start server
-CMD ["sh", "-c", "python manage.py migrate --noinput; gunicorn pathaibackend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 120 --log-level debug"]
+CMD ["sh", "-c", "python manage.py migrate --noinput; gunicorn pathaibackend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 660 --log-level debug"]

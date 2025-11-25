@@ -147,3 +147,25 @@ def performance_insights(request):
             profile.save(update_fields=['performance_insights', 'last_performance_analysis'])
 
         return Response(profile.performance_insights)
+
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def delete_account(request):
+    """
+    Delete the authenticated user's account and all associated data.
+    This action is irreversible.
+    """
+    user = request.user
+
+    try:
+        # Delete the user (this will cascade delete all related data)
+        user.delete()
+
+        return Response({
+            'message': 'Account deleted successfully'
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'error': f'Failed to delete account: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
