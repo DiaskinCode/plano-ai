@@ -729,7 +729,8 @@ class AtomicTaskAgent:
         2. Generate 5 milestones (MilestoneGenerator)
         3. Break each milestone into 5-6 atomic tasks (AtomicTaskGenerator)
         4. Enrich tasks with real URLs/data (TaskEnricher)
-        5. Validate atomicity (AtomicValidator)
+        5. Pre-validate tasks (TaskValidator - rule-based)
+        6. Batch verify and fix tasks (TaskVerifier - AI-powered)
 
         Args:
             goalspec: GoalSpec object with user's goal details

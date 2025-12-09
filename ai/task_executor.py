@@ -23,9 +23,10 @@ class TaskExecutor:
     Flow:
     1. Generate 5 milestones (MilestoneGenerator)
     2. For each milestone, generate 5-6 atomic tasks (AtomicTaskGenerator)
-    3. Validate all tasks are atomic (AtomicValidator)
-    4. Fix any non-atomic tasks
-    5. Return 25-30 validated atomic tasks
+    3. Enrich tasks with real data (TaskEnricher)
+    4. Pre-validate tasks (TaskValidator - rule-based)
+    5. Batch verify and fix tasks (TaskVerifier - AI-powered)
+    6. Return 25-30 validated atomic tasks
 
     Example:
         executor = TaskExecutor(user, profile, context)
@@ -49,7 +50,6 @@ class TaskExecutor:
         # Initialize components
         from ai.milestone_generator import create_milestone_generator
         from ai.atomic_task_generator import create_atomic_task_generator
-        from ai.atomic_validator import create_atomic_validator
         from ai.task_enricher import create_task_enricher
         from ai.story_extractor import create_story_extractor
         from ai.task_verifier import create_task_verifier
@@ -57,7 +57,6 @@ class TaskExecutor:
 
         self.milestone_gen = create_milestone_generator()
         self.atomic_gen = create_atomic_task_generator()
-        self.validator = create_atomic_validator()
         self.enricher = create_task_enricher(use_web_research=True)  # Phase 3: Enrichment
         self.story_extractor = create_story_extractor()  # Phase 3: Story extraction
         self.task_verifier = create_task_verifier()  # Phase 3: Quality verification (now batch)
@@ -182,21 +181,6 @@ class TaskExecutor:
         )
         logger.info(f"[TaskExecutor] ✅ Batch verified {len(all_tasks)}/{tasks_before_verify} tasks passed quality checks")
 
-        # === VALIDATION: ENSURE ATOMICITY ===
-        logger.info(f"\n[TaskExecutor] === VALIDATION: ATOMICITY CHECK ===")
-        validation_results = self.validator.validate_batch(all_tasks)
-
-        logger.info(f"[TaskExecutor] Validation results:")
-        logger.info(f"   Total tasks: {validation_results['total']}")
-        logger.info(f"   Passed: {validation_results['passed']} ({validation_results['passed']/validation_results['total']*100:.0f}%)")
-        logger.info(f"   Failed: {validation_results['failed']}")
-        logger.info(f"   Atomicity Score: {validation_results['atomicity_score']}%")
-
-        # Fix failed tasks if any
-        if validation_results['failed'] > 0:
-            logger.info(f"\n[TaskExecutor] === FIXING NON-ATOMIC TASKS ===")
-            all_tasks = self._fix_non_atomic_tasks(all_tasks, validation_results)
-
         # === DEDUPLICATION ===
         logger.info(f"\n[TaskExecutor] === DEDUPLICATION ===")
         tasks_before = len(all_tasks)
@@ -207,49 +191,8 @@ class TaskExecutor:
         # === FINAL RESULTS ===
         logger.info(f"\n[TaskExecutor] ========== TWO-TIER GENERATION COMPLETE ==========")
         logger.info(f"[TaskExecutor] Final task count: {len(all_tasks)} atomic tasks")
-        logger.info(f"[TaskExecutor] Atomicity score: {validation_results['atomicity_score']}%")
 
         return all_tasks
-
-    def _fix_non_atomic_tasks(
-        self,
-        tasks: List[Dict[str, Any]],
-        validation_results: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """
-        Fix non-atomic tasks by breaking them down or removing them.
-
-        Args:
-            tasks: Original task list
-            validation_results: Validation results from validator
-
-        Returns:
-            Fixed task list with only atomic tasks
-        """
-        fixed_tasks = []
-        failed_tasks = validation_results.get('failed_tasks', [])
-
-        # Create set of failed task titles for quick lookup
-        failed_titles = {task['title'] for task, _, _ in failed_tasks}
-
-        for task in tasks:
-            if task['title'] in failed_titles:
-                # Try to fix this task
-                logger.info(f"[TaskExecutor] Attempting to fix non-atomic task: {task['title'][:60]}...")
-
-                # Force breakdown using validator
-                atomic_breakdown = self.validator.force_atomic_breakdown(task)
-
-                if atomic_breakdown and len(atomic_breakdown) > 0:
-                    logger.info(f"[TaskExecutor] ✅ Broke down into {len(atomic_breakdown)} atomic tasks")
-                    fixed_tasks.extend(atomic_breakdown)
-                else:
-                    logger.warning(f"[TaskExecutor] ⚠️  Could not fix task, skipping: {task['title'][:60]}...")
-            else:
-                # Task passed validation, keep it
-                fixed_tasks.append(task)
-
-        return fixed_tasks
 
     def _deduplicate_tasks(self, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
