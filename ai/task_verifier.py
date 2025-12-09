@@ -121,11 +121,15 @@ QUALITY STANDARDS (be lenient - only fail obviously bad tasks):
 1. ATOMIC: Single action, reasonable timebox (15-90 min is OK)
 2. CLEAR: Has specific deliverable or outcome
 3. NOT VAGUE: Avoids "some", "various", "explore" without specifics
+4. NO PLACEHOLDERS: Reject obvious placeholders like "P University", "X Company", "T, O, P", single-letter abbreviations
 
 NOTE: Do NOT fail tasks for:
-- Missing user's exact name/company (tasks can reference general resources)
 - Being "too generic" if the action is clear
 - Timebox being slightly outside 15-60 range
+
+CRITICAL - MUST FAIL for:
+- Obvious placeholders: "P University", "T, O, P Universities", "X Company", single letters as names
+- Vague resources: "a professor", "some companies", "various universities" without specific names
 
 Return JSON with verification for EACH task by index:
 {{
@@ -190,6 +194,11 @@ FAILED TASKS:
 {json.dumps(task_list, indent=2)}
 
 Fix each task to address the issues. Keep fixes minimal - don't over-engineer.
+
+CRITICAL: Replace ANY placeholders (P University, T, O, P, X Company) with:
+- Actual names from user context/stories if available
+- OR make the task more general but still actionable (e.g., "Email admissions office at your top-choice university")
+- NEVER leave placeholders like single letters or "T, O, P"
 
 Return JSON array of fixed tasks:
 [
@@ -297,6 +306,7 @@ VERIFICATION CHECKLIST:
 3. ✓ SPECIFIC RESOURCE?
    - Names actual person/company/website/document
    - NOT vague like "some companies" or "a professor"
+   - NOT placeholders like "P University", "T, O, P Universities", "X Company"
 
 EXAMPLES:
 
