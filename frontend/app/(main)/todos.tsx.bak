@@ -1,0 +1,1984 @@
+import { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  SectionList,
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+  Alert,
+  TextInput,
+  Modal,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
+import { BlurView } from 'expo-blur';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { todosAPI, insightsAPI, goalSpecAPI } from '@/services/api';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import CalendarScreen from './calendar';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import {
+  scheduleNotificationForTask,
+  cancelNotificationForTask,
+  syncTaskNotifications
+} from '@/utils/taskNotifications';
+import analytics from '@/services/analytics';
+import { colors, spacing, borderRadius } from '@/theme';
+import { FadeInSlide } from '@/lib/animations';
+import LiquidGlassCard from '@/components/LiquidGlassCard';
+
+// Generate 14 days (7 before, today, 6 after)
+const generateDays = () => {
+  const days = [];
+  const today = new Date();
+  for (let i = -7; i <= 6; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    days.push(date);
+  }
+  return days;
+};
+
+// Helper to group todos by date
+const groupTodosByDate = (todos: any[]) => {
+  const grouped: { [key: string]: any[] } = {};
+
+  todos.forEach(todo => {
+    const date = todo.scheduled_date;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(todo);
+  });
+
+  // Convert to array and sort by date
+  return Object.keys(grouped)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+    .map(date => ({
+      title: date,
+      data: grouped[date],
+    }));
+};
+
+// Category color mapping
+const getCategoryColor = (category: string): string => {
+  switch (category?.toLowerCase()) {
+    case 'study': return '#FF3B30';
+    case 'language': return '#3B82F6';
+    case 'sport': return '#34C759';
+    case 'career': return '#06B6D4';
+    case 'finance': return '#FFD60A';
+    case 'health': return '#FF69B4';
+    case 'creative': return '#A855F7';
+    default: return '#5B6AFF';
+  }
+};
+
+// College admissions task category color mapping
+const getCollegeCategoryColor = (category: string): string => {
+  switch (category) {
+    case 'Documents': return '#3B82F6';  // Blue
+    case 'Essays': return '#10B981';     // Green
+    case 'Portfolio': return '#8B5CF6';  // Purple
+    case 'SAT Prep': return '#F59E0B';    // Orange
+    case 'IELTS Prep': return '#F97316';  // Red-Orange
+    case 'Applications': return '#EF4444'; // Red
+    case 'Extracurriculars': return '#6B7280'; // Gray
+    default: return '#5B6AFF';
+  }
+};
+
+// Get college category icon
+const getCollegeCategoryIcon = (category: string): string => {
+  switch (category) {
+    case 'Documents': return '📄';
+    case 'Essays': return '📝';
+    case 'Portfolio': return '💼';
+    case 'SAT Prep': return '📊';
+    case 'IELTS Prep': return '🗣';
+    case 'Applications': return '🎓';
+    case 'Extracurriculars': return '🎯';
+    default: return '📌';
+  }
+};
+
+export default function TodosScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const goalspecId = params.goalspecId ? Number(params.goalspecId) : null;
+
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [todos, setTodos] = useState<any[]>([]);
+  const [sections, setSections] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [statusFilter, setStatusFilter] = useState('all'); // all, pending, done
+  const [goalspecs, setGoalspecs] = useState<any[]>([]);
+  const [goalspecMap, setGoalspecMap] = useState<{ [key: number]: any }>({});
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [newTodoText, setNewTodoText] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [generationStage, setGenerationStage] = useState<string>('');
+  const [days] = useState(generateDays());
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const dayScrollRef = useRef<ScrollView>(null);
+  const [isGuest, setIsGuest] = useState(false);
+
+  // Feedback Modal State
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackTask, setFeedbackTask] = useState<any>(null);
+  const [feedbackType, setFeedbackType] = useState<'completed' | 'skipped'>('completed');
+  const [difficultyRating, setDifficultyRating] = useState(3);
+  const [actualDuration, setActualDuration] = useState('');
+  const [energyAtCompletion, setEnergyAtCompletion] = useState<'high' | 'medium' | 'low'>('medium');
+  const [feedbackNotes, setFeedbackNotes] = useState('');
+  const [skipReason, setSkipReason] = useState<'skipped_no_time' | 'skipped_no_motivation' | 'skipped_distracted' | 'skipped_too_hard' | 'skipped_other'>('skipped_no_time');
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+
+  useEffect(() => {
+    const checkGuestMode = async () => {
+      const guestMode = await AsyncStorage.getItem('isGuest');
+      setIsGuest(guestMode === 'true');
+    };
+    checkGuestMode();
+    loadGoalspecs();
+  }, []);
+
+  useEffect(() => {
+    if (viewMode === 'list' && !isGuest) {
+      loadTodos();
+    }
+  }, [selectedDate, statusFilter, viewMode, goalspecId, isGuest]);
+
+  // Auto-scroll to today's date
+  useEffect(() => {
+    setTimeout(() => {
+      const todayIndex = days.findIndex(day => isToday(day));
+      if (todayIndex !== -1 && dayScrollRef.current) {
+        dayScrollRef.current.scrollTo({ x: todayIndex * 52, animated: true });
+      }
+    }, 100);
+  }, []);
+
+  const handleGenerateTasks = async () => {
+    Alert.alert(
+      'Check Eligibility First',
+      'Let\'s verify which universities you\'re eligible for before generating tasks. This ensures we create the right plan for you.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Check Now',
+          onPress: () => router.push('/task/eligibility-gate')
+        }
+      ]
+    );
+  };
+
+            } catch (error: any) {
+              setGenerationStage('');
+              setGenerating(false);
+              console.error('Task generation error:', error);
+
+              // Better error messages
+              if (error.response?.status === 500) {
+                Alert.alert(
+                  'Server Error',
+                  'The task generation service is temporarily unavailable. Please try again in a moment.',
+                  [{ text: 'OK' }]
+                );
+              } else if (error.response?.data?.error) {
+                Alert.alert('Error', error.response.data.error);
+              } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+                Alert.alert(
+                  'Timeout',
+                  'Request timed out. The server may be busy. Please try again.',
+                  [{ text: 'OK' }]
+                );
+              } else {
+                Alert.alert(
+                  'Error',
+                  'Failed to generate plan. Please check your connection and try again.',
+                  [{ text: 'OK' }]
+                );
+              }
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const loadGoalspecs = async () => {
+    try {
+      const response = await goalSpecAPI.list();
+      const specs = response.data;
+
+      // Ensure specs is an array before processing
+      if (Array.isArray(specs)) {
+        setGoalspecs(specs);
+
+        // Create a map for quick lookup
+        const map: { [key: number]: any } = {};
+        specs.forEach((spec: any) => {
+          map[spec.id] = spec;
+        });
+        setGoalspecMap(map);
+      } else {
+        console.warn('Goalspecs response is not an array:', specs);
+        setGoalspecs([]);
+        setGoalspecMap({});
+      }
+    } catch (error) {
+      console.error('Failed to load goalspecs:', error);
+      setGoalspecs([]);
+      setGoalspecMap({});
+    }
+  };
+
+  const loadTodos = async () => {
+    try {
+      setLoading(true);
+      const status = statusFilter === 'all' ? undefined : statusFilter;
+
+      // Fetch all todos (for list view, we want all upcoming/past dates)
+      const response = await todosAPI.list(undefined, status);
+      let allTodos = response.data.results || response.data;
+
+      // Filter by goalspecId if provided
+      if (goalspecId) {
+        allTodos = allTodos.filter((todo: any) => todo.goalspec === goalspecId);
+      }
+
+      setTodos(allTodos);
+
+      // Group by date for SectionList
+      const grouped = groupTodosByDate(allTodos);
+      setSections(grouped);
+
+      // Sync local notifications with server state
+      syncTaskNotifications(() => Promise.resolve({ data: { results: allTodos } }));
+    } catch (error) {
+      console.error('Failed to load todos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  const isSameDay = (date1: Date, date2: Date) => {
+    return date1.toDateString() === date2.toDateString();
+  };
+
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days = [];
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const handleMarkDone = async (task: any) => {
+    try {
+      // Mark task as done using the markDone endpoint
+      await todosAPI.markDone(task.id);
+
+      // Track task completion
+      const goalspec = task.goalspec ? goalspecMap[task.goalspec] : null;
+      analytics.trackTaskCompleted(task.id, {
+        title: task.title,
+        goalspec_id: task.goalspec,
+        category: goalspec?.category || goalspec?.goal_type,
+      });
+
+      // Refresh the list
+      loadTodos();
+      // Show brief success feedback
+      setFeedbackTask(task);
+      setFeedbackType('completed');
+      setShowFeedbackModal(true);
+      // Auto-close after 1.5 seconds
+      setTimeout(() => {
+        setShowFeedbackModal(false);
+        setFeedbackTask(null);
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to mark task as done:', error);
+    }
+  };
+
+  const handleSkip = async (task: any) => {
+    try {
+      // Skip task using the skip endpoint
+      await todosAPI.skip(task.id);
+
+      // Track task skip
+      analytics.trackTaskSkipped(task.id);
+
+      // Refresh the list
+      loadTodos();
+      // Show brief feedback
+      setFeedbackTask(task);
+      setFeedbackType('skipped');
+      setShowFeedbackModal(true);
+      // Auto-close after 1.5 seconds
+      setTimeout(() => {
+        setShowFeedbackModal(false);
+        setFeedbackTask(null);
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to skip task:', error);
+    }
+  };
+
+  const submitFeedback = async () => {
+    if (!feedbackTask) return;
+
+    try {
+      setSubmittingFeedback(true);
+
+      if (feedbackType === 'completed') {
+        // Complete with feedback
+        await insightsAPI.completeWithFeedback(feedbackTask.id, {
+          completion_reason: 'completed',
+          difficulty_rating: difficultyRating,
+          actual_duration_minutes: actualDuration ? parseInt(actualDuration) : undefined,
+          notes: feedbackNotes || undefined,
+          energy_level_at_completion: energyAtCompletion,
+        });
+
+        // Cancel local notification for completed task
+        await cancelNotificationForTask(feedbackTask.id);
+
+        Alert.alert('Success', 'Task completed! 🎉');
+      } else {
+        // Skip with feedback
+        await insightsAPI.completeWithFeedback(feedbackTask.id, {
+          completion_reason: skipReason,
+          notes: feedbackNotes || undefined,
+        });
+
+        // Cancel local notification for skipped task
+        await cancelNotificationForTask(feedbackTask.id);
+
+        Alert.alert('Success', 'Task skipped');
+      }
+
+      setShowFeedbackModal(false);
+      setFeedbackTask(null);
+      loadTodos();
+    } catch (error: any) {
+      console.error('Failed to submit feedback:', error);
+      Alert.alert('Error', error?.response?.data?.error || 'Failed to submit feedback');
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
+
+  const handleAddTodo = async () => {
+    if (!newTodoText.trim()) return;
+
+    try {
+      const response = await todosAPI.createTodo({
+        task: newTodoText,
+        scheduled_for: new Date().toISOString().split('T')[0],
+      });
+
+      // Track task creation
+      if (response.data) {
+        analytics.trackTaskCreated(response.data.id, {
+          title: response.data.title || newTodoText,
+          scheduled_date: new Date().toISOString().split('T')[0],
+        });
+
+        // Schedule local notification for the created task
+        await scheduleNotificationForTask(response.data);
+      }
+
+      setNewTodoText('');
+      setShowAddModal(false);
+      loadTodos();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create todo');
+    }
+  };
+
+  const renderTodo = ({ item }: any) => {
+    const isPast = new Date(item.scheduled_date) < new Date(new Date().setHours(0, 0, 0, 0));
+    const isDone = item.status === 'done';
+    const isSkipped = item.status === 'skipped';
+    const endTime = item.scheduled_time && item.estimated_duration_minutes
+      ? calculateEndTime(item.scheduled_time, item.estimated_duration_minutes)
+      : null;
+
+    // Get goalspec data
+    const goalspec = item.goalspec ? goalspecMap[item.goalspec] : null;
+    const categoryColor = goalspec ? getCategoryColor(goalspec.category || goalspec.goal_type) : '#5B6AFF';
+
+    // Get energy icon and color
+    const getEnergyBadge = (level: string) => {
+      switch (level) {
+        case 'high': return { icon: 'flash', color: '#FF3B30', label: 'High' };
+        case 'medium': return { icon: 'battery-medium', color: '#FF9500', label: 'Med' };
+        case 'low': return { icon: 'weather-night', color: '#34C759', label: 'Low' };
+        default: return { icon: 'help-circle-outline', color: '#8E8E8E', label: '?' };
+      }
+    };
+
+    const energyBadge = getEnergyBadge(item.energy_level || 'medium');
+
+    return (
+
+      <View style={{ marginBottom: spacing.sm }}>
+        <LiquidGlassCard
+          onPress={() => router.push(`/task/${item.id}`)}
+          variant={isDone ? 'subtle' : 'default'}
+          intensity={isDone ? 'light' : 'medium'}
+          style={[
+            styles.todoCard,
+            isPast && !isDone && styles.compactCardPast,
+            isSkipped && styles.compactCardSkipped
+          ]}
+        >
+          <View style={styles.todoCardContent}>
+            {/* Done/Skipped indicator */}
+            {isDone && (
+              <View style={styles.doneIndicator}>
+                <MaterialCommunityIcons name="check-circle" size={20} color="#34C759" />
+              </View>
+            )}
+            {isSkipped && (
+              <View style={styles.doneIndicator}>
+                <MaterialCommunityIcons name="close-circle" size={20} color="#FF9500" />
+              </View>
+            )}
+            <View style={[styles.leftBorder, { backgroundColor: isDone ? '#34C759' : isSkipped ? '#FF9500' : goalspec ? categoryColor : getPriorityColor(item.priority) }]} />
+
+            <View style={styles.taskContent}>
+              <View style={styles.taskInfo}>
+                <Text style={[
+                  styles.taskTitle,
+                  isPast && !isDone && styles.taskTitlePast,
+                  isDone && styles.taskTitleDone,
+                  isSkipped && styles.taskTitleSkipped
+                ]} numberOfLines={2}>
+                  {item.title}
+                </Text>
+
+                {/* Goal Badge */}
+                {goalspec && (
+                  <View style={[styles.goalBadge, { backgroundColor: categoryColor + '20', borderColor: categoryColor }]}>
+                    <Text style={[styles.goalBadgeText, { color: categoryColor }]}>
+                      {goalspec.title}
+                    </Text>
+                  </View>
+                )}
+
+                {/* College Category Badge */}
+                {item.category && (
+                  <View style={[styles.goalBadge, { backgroundColor: getCollegeCategoryColor(item.category.name) + '20', borderColor: getCollegeCategoryColor(item.category.name) }]}>
+                    <Text style={[styles.goalBadgeText, { color: getCollegeCategoryColor(item.category.name) }]}>
+                      {getCollegeCategoryIcon(item.category.name)} {item.category.name}
+                    </Text>
+                  </View>
+                )}
+
+                {/* AI Properties Row */}
+                <View style={styles.aiPropertiesRow}>
+                  {/* Energy Level Badge */}
+                  <View style={[styles.aiPropertyBadge, { borderColor: energyBadge.color }]}>
+                    <MaterialCommunityIcons name={energyBadge.icon as any} size={12} color={energyBadge.color} />
+                    <Text style={[styles.aiPropertyText, { color: energyBadge.color }]}>
+                      {energyBadge.label}
+                    </Text>
+                  </View>
+
+                  {/* Cognitive Load (dots) */}
+                  {item.cognitive_load && (
+                    <View style={styles.aiPropertyBadge}>
+                      {[...Array(5)].map((_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.cognitiveDot,
+                            i < item.cognitive_load && styles.cognitiveDotFilled
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Timebox */}
+                  {item.timebox_minutes && (
+                    <View style={styles.timeboxBadge}>
+                      <MaterialCommunityIcons name="clock-outline" size={12} color="#8E8E8E" />
+                      <Text style={styles.timeboxText}>{item.timebox_minutes}m</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Show time only if it exists */}
+                {item.scheduled_time && (
+                  <Text style={[styles.taskTime, isPast && styles.taskTimePast]}>
+                    {endTime ? `${item.scheduled_time} — ${endTime}` : item.scheduled_time}
+                  </Text>
+                )}
+              </View>
+
+              {/* Action Buttons Below */}
+              <View style={styles.bottomActions}>
+                <TouchableOpacity
+                  style={styles.viewDetailsButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.push(`/task/${item.id}`);
+                  }}
+                >
+                  <Text style={styles.viewDetailsText}>Details</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color="#FFFFFF" />
+                </TouchableOpacity>
+
+                {/* Only show action buttons for pending tasks */}
+                {!isDone && !isSkipped && (
+                  <View style={styles.actionButtonsGroup}>
+                    <TouchableOpacity
+                      style={styles.miniButton}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleMarkDone(item);
+                      }}
+                    >
+                      <MaterialCommunityIcons name="check" size={20} color="#34C759" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.miniButton}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleSkip(item);
+                      }}
+                    >
+                      <MaterialCommunityIcons name="close" size={20} color="#FF9500" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Show status badge for done/skipped tasks */}
+                {isDone && (
+                  <View style={styles.statusBadge}>
+                    <Text style={styles.statusBadgeText}>Completed</Text>
+                  </View>
+                )}
+                {isSkipped && (
+                  <View style={[styles.statusBadge, styles.statusBadgeSkipped]}>
+                    <Text style={styles.statusBadgeText}>Skipped</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+        </LiquidGlassCard>
+      </View>
+    );
+  };
+
+  const calculateEndTime = (startTime: string, durationMinutes: number): string => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + durationMinutes;
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMinutes = totalMinutes % 60;
+    return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+  };
+
+  const formatSectionHeader = (dateString: string): string => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const isPast = date < new Date(today.setHours(0, 0, 0, 0));
+
+    const dayNames = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+    const monthNames = ['янв.', 'февр.', 'март', 'апр.', 'май', 'июнь', 'июль', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+
+    const dayName = dayNames[date.getDay()];
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+
+    return `${dayName} — ${day} ${month}.`;
+  };
+
+  const renderSectionHeader = ({ section }: any) => {
+    const isPast = new Date(section.title) < new Date(new Date().setHours(0, 0, 0, 0));
+    const isToday = new Date(section.title).toDateString() === new Date().toDateString();
+
+    return (
+      <Text style={[
+        styles.sectionHeader,
+        isPast && styles.sectionHeaderPast,
+        isToday && styles.sectionHeaderToday
+      ]}>
+        {formatSectionHeader(section.title)}
+      </Text>
+    );
+  };
+
+  // Guest mode UI
+  if (isGuest) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Tasks</Text>
+        </View>
+
+        <View style={styles.guestPromptContainer}>
+          <MaterialCommunityIcons name="lock-outline" size={64} color="#5B6AFF" />
+          <Text style={styles.guestPromptTitle}>Sign in to Create Tasks</Text>
+          <Text style={styles.guestPromptText}>
+            Create an account to build your personalized task list and track your progress
+          </Text>
+
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={async () => {
+              await AsyncStorage.removeItem('isGuest');
+              router.replace('/(auth)/login');
+            }}
+          >
+            <Text style={styles.signInButtonText}>Sign In</Text>
+            <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.createAccountButton}
+            onPress={async () => {
+              await AsyncStorage.removeItem('isGuest');
+              router.replace('/(auth)/register');
+            }}
+          >
+            <Text style={styles.createAccountButtonText}>Create Account</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Tasks</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setShowAddModal(true)}
+        >
+          <Text style={styles.addButtonText}>+ Add</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* View Switcher - Компактный */}
+      <View style={styles.viewSwitcher}>
+        <TouchableOpacity
+          style={[styles.viewButton, viewMode === 'list' && styles.viewButtonActive]}
+          onPress={() => setViewMode('list')}
+        >
+          <MaterialCommunityIcons name="format-list-checks" size={16} color={viewMode === 'list' ? '#fff' : '#8E8E8E'} />
+          <Text style={[styles.viewButtonText, viewMode === 'list' && styles.viewButtonTextActive]}>List</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.viewButton, viewMode === 'calendar' && styles.viewButtonActive]}
+          onPress={() => setViewMode('calendar')}
+        >
+          <MaterialCommunityIcons name="calendar-clock" size={16} color={viewMode === 'calendar' ? '#fff' : '#8E8E8E'} />
+          <Text style={[styles.viewButtonText, viewMode === 'calendar' && styles.viewButtonTextActive]}>Calendar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {viewMode === 'calendar' ? (
+        <CalendarScreen
+          selectedDateProp={selectedDate}
+          onDateChange={setSelectedDate}
+          hideDayPicker={true}
+          onOpenFullCalendar={() => setShowCalendarModal(true)}
+        />
+      ) : (
+        <>
+          <View style={styles.statusFilterContainer}>
+            {['all', 'pending', 'done'].map((s) => (
+              <TouchableOpacity
+                key={s}
+                style={[styles.statusFilterButton, statusFilter === s && styles.statusFilterButtonActive]}
+                onPress={() => setStatusFilter(s)}
+              >
+                <Text
+                  style={[styles.statusFilterText, statusFilter === s && styles.statusFilterTextActive]}
+                >
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <SectionList
+            sections={sections}
+            renderItem={renderTodo}
+            renderSectionHeader={renderSectionHeader}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl refreshing={loading} onRefresh={loadTodos} />
+            }
+            stickySectionHeadersEnabled={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconContainer}>
+                  <MaterialCommunityIcons name="calendar-clock" size={48} color="#5B6AFF" />
+                </View>
+                <Text style={styles.emptyText}>No Admissions Plan Yet</Text>
+                <Text style={styles.emptyDescription}>
+                  Get a personalized roadmap with application deadlines, essay milestones, and test schedules
+                </Text>
+
+                <View style={styles.benefitsRow}>
+                  <View style={styles.benefitItem}>
+                    <MaterialCommunityIcons name="calendar-check" size={18} color="#4ADE80" />
+                    <Text style={styles.benefitText}>Deadlines</Text>
+                  </View>
+                  <View style={styles.benefitItem}>
+                    <MaterialCommunityIcons name="pencil" size={18} color="#5B6AFF" />
+                    <Text style={styles.benefitText}>Essays</Text>
+                  </View>
+                  <View style={styles.benefitItem}>
+                    <MaterialCommunityIcons name="school" size={18} color="#FF9500" />
+                    <Text style={styles.benefitText}>Tests</Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.generatePlanButton}
+                  onPress={handleGenerateTasks}
+                  disabled={generating}
+                >
+                  {generating ? (
+                    <>
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text style={styles.generatePlanButtonText}>
+                        {generationStage || 'Generating...'}
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <MaterialCommunityIcons name="rocket-launch" size={20} color="#fff" />
+                      <Text style={styles.generatePlanButtonText}>
+                        Generate Admissions Plan
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            }
+          />
+
+          {/* Calendar Modal (Full Calendar) */}
+          <Modal
+            visible={showCalendarModal}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setShowCalendarModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.fullCalendarModal}>
+                <View style={styles.fullCalendarHeader}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() - 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                  >
+                    <MaterialCommunityIcons name="chevron-left" size={28} color="#ECECEC" />
+                  </TouchableOpacity>
+                  <Text style={styles.fullCalendarTitle}>
+                    {calendarMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() + 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                  >
+                    <MaterialCommunityIcons name="chevron-right" size={28} color="#ECECEC" />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.calendarGrid}>
+                  {getDaysInMonth(calendarMonth).map((day) => {
+                    const isSelected = day.toDateString() === selectedDate.toDateString();
+                    const isTodayDay = day.toDateString() === new Date().toDateString();
+                    return (
+                      <TouchableOpacity
+                        key={day.toISOString()}
+                        style={[
+                          styles.calendarDay,
+                          isSelected && styles.calendarDaySelected,
+                          isTodayDay && styles.calendarDayToday,
+                        ]}
+                        onPress={() => {
+                          setSelectedDate(day);
+                          setCalendarMonth(day);
+                          setShowCalendarModal(false);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.calendarDayText,
+                            isSelected && styles.calendarDayTextSelected,
+                            isTodayDay && !isSelected && styles.calendarDayTextToday,
+                          ]}
+                        >
+                          {day.getDate()}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <TouchableOpacity
+                  style={styles.closeCalendarButton}
+                  onPress={() => setShowCalendarModal(false)}
+                >
+                  <Text style={styles.closeCalendarText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            visible={showAddModal}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setShowAddModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Add New Task</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="What needs to be done?"
+                  value={newTodoText}
+                  onChangeText={setNewTodoText}
+                  multiline
+                  autoFocus
+                />
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      setShowAddModal(false);
+                      setNewTodoText('');
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.saveButton]}
+                    onPress={handleAddTodo}
+                  >
+                    <Text style={styles.saveButtonText}>Add Task</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Task Completion/Skip Confirmation Modal */}
+          <Modal
+            visible={showFeedbackModal}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => setShowFeedbackModal(false)}
+          >
+            <View style={styles.successModalOverlay}>
+              <View style={styles.successModal}>
+                <View style={[
+                  styles.successIconContainer,
+                  { backgroundColor: feedbackType === 'completed' ? 'rgba(52, 199, 89, 0.15)' : 'rgba(255, 149, 0, 0.15)' }
+                ]}>
+                  <MaterialCommunityIcons
+                    name={feedbackType === 'completed' ? 'check-circle' : 'close-circle'}
+                    size={48}
+                    color={feedbackType === 'completed' ? '#34C759' : '#FF9500'}
+                  />
+                </View>
+                <Text style={styles.successTitle}>
+                  {feedbackType === 'completed' ? 'Task Completed!' : 'Task Skipped'}
+                </Text>
+                <Text style={styles.successTaskName} numberOfLines={2}>
+                  {feedbackTask?.title}
+                </Text>
+              </View>
+            </View>
+          </Modal>
+        </>
+      )}
+    </View>
+  );
+}
+
+const getPriorityColor = (priority: number | string) => {
+  // Convert number to string if needed (backend sends 1=low, 2=medium, 3=high)
+  const priorityStr = typeof priority === 'number'
+    ? (priority === 3 ? 'high' : priority === 2 ? 'medium' : 'low')
+    : priority?.toLowerCase();
+
+  switch (priorityStr) {
+    case 'high': return '#FF3B30';
+    case 'medium': return '#FF9500';
+    case 'low': return '#34C759';
+    default: return '#999';
+  }
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing.md,
+    paddingTop: 60,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  addButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.lg,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  // Goals Section Styles
+  goalsSection: {
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  goalsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  goalsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  viewMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  viewMoreText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  goalsCarousel: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  goalCard: {
+    width: 200,
+  },
+  goalHeader: {
+    marginBottom: spacing.sm,
+  },
+  goalTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+    flex: 1,
+  },
+  goalCategoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  goalCategoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  goalDescription: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+    lineHeight: 16,
+  },
+  goalProgressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  goalProgressBar: {
+    flex: 1,
+    height: 4,
+    backgroundColor: colors.bg,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  goalProgressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 2,
+  },
+  goalProgressText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary,
+    minWidth: 35,
+    textAlign: 'right',
+  },
+  noGoalsContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    gap: spacing.sm,
+  },
+  noGoalsText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  createGoalButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.sm,
+  },
+  createGoalButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  calendarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bg,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surface,
+  },
+  calendarScroll: {
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+  },
+  dayButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surface,
+    minWidth: 60,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  dayButtonSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  dayButtonToday: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  dayName: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  dayNameSelected: {
+    color: '#fff',
+  },
+  dayNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  dayNumberSelected: {
+    color: '#fff',
+  },
+  calendarArrow: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+  },
+  statusFilterContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
+    backgroundColor: colors.bg,
+  },
+  statusFilterButton: {
+    flex: 1,
+    paddingVertical: 6,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  statusFilterButtonActive: {
+    backgroundColor: colors.success,
+    borderColor: colors.success,
+  },
+  statusFilterText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  statusFilterTextActive: {
+    color: '#fff',
+  },
+  listContent: {
+    padding: spacing.md,
+  },
+  todoCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  todoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  todoInfo: {
+    flex: 1,
+  },
+  todoTask: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+    color: colors.text,
+  },
+  todoTime: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  priorityBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: borderRadius.xs,
+    height: 24,
+  },
+  priorityText: {
+    fontSize: 11,
+    color: '#fff',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  todoActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  doneButton: {
+    backgroundColor: colors.success,
+  },
+  skipButton: {
+    backgroundColor: colors.warning,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingHorizontal: spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(91, 106, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+    lineHeight: 20,
+    paddingHorizontal: spacing.md,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: colors.textTertiary,
+  },
+  benefitsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  benefitItem: {
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  benefitText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  generateButton: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+  },
+  generatePlanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.lg,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  generateButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  generatePlanButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: spacing.md,
+    color: colors.text,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bg,
+    color: colors.text,
+    borderRadius: borderRadius.sm,
+    padding: spacing.sm,
+    fontSize: 16,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: spacing.md,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: colors.border,
+  },
+  saveButton: {
+    backgroundColor: colors.primary,
+  },
+  cancelButtonText: {
+    color: colors.text,
+    fontWeight: '600',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  viewSwitcher: {
+    flexDirection: 'row',
+    padding: spacing.sm,
+    paddingHorizontal: spacing.md,
+    gap: 4,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  viewButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  viewButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  viewButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  viewButtonTextActive: {
+    color: '#fff',
+  },
+  // Compact card styles
+  todoCard: {
+    borderRadius: borderRadius.lg,
+  },
+  todoCardContent: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  compactCard: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+    alignItems: 'stretch',
+  },
+  compactCardPast: {
+    opacity: 0.6,
+  },
+  compactCardDone: {
+    backgroundColor: `${colors.success}14`,
+    borderWidth: 1,
+    borderColor: `${colors.success}33`,
+  },
+  compactCardSkipped: {
+    backgroundColor: `${colors.warning}14`,
+    borderWidth: 1,
+    borderColor: `${colors.warning}33`,
+    opacity: 0.7,
+  },
+  doneIndicator: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  leftBorder: {
+    width: 4,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+    marginRight: spacing.sm,
+  },
+  taskContent: {
+    flex: 1,
+  },
+  taskInfo: {
+    marginBottom: spacing.sm,
+  },
+  taskTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+  taskTitlePast: {
+    color: colors.textSecondary,
+  },
+  taskTitleDone: {
+    color: colors.success,
+    textDecorationLine: 'line-through',
+    opacity: 0.8,
+  },
+  taskTitleSkipped: {
+    color: colors.warning,
+    textDecorationLine: 'line-through',
+    opacity: 0.7,
+  },
+  goalBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    marginBottom: 6,
+  },
+  goalBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  taskTime: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  taskTimePast: {
+    color: colors.textTertiary,
+  },
+  bottomActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    alignItems: 'center',
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  actionButtonsGroup: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  inlineActions: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+  },
+  miniButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewDetailsButton: {
+    flexDirection: 'row',
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.md,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  viewDetailsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  // Section headers
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    backgroundColor: colors.bg,
+  },
+  sectionHeaderPast: {
+    color: colors.textSecondary,
+  },
+  sectionHeaderToday: {
+    color: colors.error,
+  },
+  dayPickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surface,
+  },
+  dayPickerContent: {
+    paddingRight: spacing.sm,
+    gap: spacing.sm,
+  },
+  dayButtonCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayButtonCircleSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  dayButtonCircleToday: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  dayButtonCircleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  dayButtonCircleTextSelected: {
+    color: '#fff',
+  },
+  calendarIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullCalendarModal: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    width: '90%',
+    maxHeight: '80%',
+  },
+  fullCalendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  fullCalendarTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  },
+  calendarDay: {
+    width: '13%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  calendarDaySelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  calendarDayToday: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  calendarDayText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  calendarDayTextSelected: {
+    color: '#fff',
+  },
+  calendarDayTextToday: {
+    color: colors.primary,
+  },
+  closeCalendarButton: {
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  closeCalendarText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  // AI Properties Styles
+  aiPropertiesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  aiPropertyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: borderRadius.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bg,
+    gap: 3,
+  },
+  aiPropertyText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  cognitiveDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    marginHorizontal: 1,
+  },
+  cognitiveDotFilled: {
+    backgroundColor: colors.warning,
+  },
+  timeboxBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: borderRadius.xs,
+    backgroundColor: colors.bg,
+    gap: 3,
+  },
+  timeboxText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+
+  // Feedback Modal Styles
+  feedbackModal: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: borderRadius.xxl,
+    borderTopRightRadius: borderRadius.xxl,
+    width: '100%',
+    maxHeight: '85%',
+    padding: spacing.lg,
+  },
+  feedbackHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  feedbackTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  feedbackContent: {
+    flex: 1,
+  },
+  feedbackTaskTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    marginBottom: spacing.lg,
+  },
+  feedbackLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: spacing.sm,
+    marginTop: spacing.md,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  ratingButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+  },
+  ratingButtonActive: {
+    borderColor: colors.warning,
+  },
+  feedbackInput: {
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    padding: spacing.sm,
+    fontSize: 15,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  energyRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: spacing.sm,
+  },
+  energyButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+  },
+  energyButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  energyText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  energyTextActive: {
+    color: '#fff',
+  },
+  skipReasonsContainer: {
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  skipReasonButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+  },
+  skipReasonButtonActive: {
+    backgroundColor: colors.warning,
+    borderColor: colors.warning,
+  },
+  skipReasonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  skipReasonTextActive: {
+    color: '#fff',
+  },
+  feedbackNotesInput: {
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    padding: spacing.sm,
+    fontSize: 14,
+    color: colors.text,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    marginBottom: spacing.lg,
+  },
+  submitFeedbackButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  submitFeedbackText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  successModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  successModal: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    width: '80%',
+    maxWidth: 300,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  successIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  successTaskName: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  statusBadge: {
+    backgroundColor: `${colors.success}26`,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: `${colors.success}4D`,
+  },
+  statusBadgeSkipped: {
+    backgroundColor: `${colors.warning}26`,
+    borderColor: `${colors.warning}4D`,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  guestPromptContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  guestPromptTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  guestPromptText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+    lineHeight: 24,
+  },
+  signInButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  signInButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  createAccountButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.md,
+    width: '100%',
+    alignItems: 'center',
+  },
+  createAccountButtonText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});

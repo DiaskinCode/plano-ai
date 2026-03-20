@@ -1,0 +1,349 @@
+{
+  "common": {
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "streak": "Серия",
+    "tasks": "Задачи",
+    "done": "Готово",
+    "pending": "В ожидании",
+    "skip": "Пропустить",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "close": "Закрыть",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "confirm": "Подтвердить"
+  },
+  "navigation": {
+    "chat": "Чат",
+    "tasks": "Задачи",
+    "calendar": "Календарь",
+    "vision": "Видение",
+    "goals": "Цели",
+    "community": "Сообщество",
+    "profile": "Профиль"
+  },
+  "auth": {
+    "login": "Войти",
+    "register": "Регистрация",
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "forgotPassword": "Забыли пароль?",
+    "noAccount": "Нет аккаунта?",
+    "haveAccount": "Уже есть аккаунт?",
+    "signIn": "Войти",
+    "signUp": "Зарегистрироваться",
+    "welcomeBack": "С возвращением",
+    "welcomeBackSubtitle": "Войдите чтобы продолжить ваш путь",
+    "createAccount": "Создать аккаунт",
+    "joinPlano": "Присоединяйтесь к Plano",
+    "startJourney": "Начните свой путь с Plano",
+    "username": "Имя пользователя",
+    "usernamePlaceholder": "Введите имя пользователя",
+    "confirmPasswordPlaceholder": "Подтвердите ваш пароль",
+    "loggingIn": "Вход...",
+    "creatingAccount": "Создание аккаунта...",
+    "emailPlaceholder": "Введите email",
+    "passwordPlaceholder": "Введите пароль",
+    "registerLink": "Регистрация",
+    "loginLink": "Войти"
+  },
+  "onboarding": {
+    "welcome": "Добро пожаловать в Plano",
+    "getStarted": "Начать",
+    "name": "Как вас зовут?",
+    "age": "Сколько вам лет?",
+    "goals": "Каковы ваши цели?",
+    "dreamCareer": "Карьера вашей мечты?",
+    "budget": "Какой у вас бюджет?",
+    "timeline": "Какие сроки?",
+    "chooseCoach": "Выберите тренера",
+    "aggressive": "Агрессивный",
+    "cute": "Милый",
+    "supportive": "Поддерживающий",
+    "professional": "Профессиональный",
+    "next": "Далее",
+    "previous": "Назад",
+    "finish": "Завершить"
+  },
+  "home": {
+    "goodMorning": "Доброе утро",
+    "goodAfternoon": "Добрый день",
+    "goodEvening": "Добрый вечер",
+    "dailyHeadline": "Заголовок дня",
+    "quickStats": "Быстрая статистика",
+    "tasksDone": "Выполнено задач",
+    "tasksRemaining": "Осталось задач",
+    "upcomingTasks": "Предстоящие задачи",
+    "noTasks": "Нет задач на сегодня",
+    "createTask": "Создать задачу",
+    "vision": "Видение",
+    "newChat": "Новый чат",
+    "deleteConversation": "Удалить разговор",
+    "areYouSure": "Вы уверены?",
+    "messages": "сообщений",
+    "welcomeMessage": "Привет! Я ваш AI коуч по жизни. Чем могу помочь вам сегодня?",
+    "keepGoing": "Продолжайте",
+    "streak": "Серия",
+    "tasksCreated": "Задачи созданы",
+    "tasksCreatedMessage": "задач(и) добавлено в ваш список!",
+    "tasksCompleted": "Задачи завершены",
+    "tasksCompletedMessage": "Отмечено {{count}} задач(и) как выполненные! 🎉",
+    "awesome": "Отлично!",
+    "error": "Ошибка",
+    "failedToGetResponse": "Не удалось получить ответ AI",
+    "failedToStartRecording": "Не удалось начать запись",
+    "failedToTranscribe": "Не удалось расшифровать аудио",
+    "placeholderMessage": "Сообщение Plano..."
+  },
+  "tasks": {
+    "title": "Задачи",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "upcoming": "Предстоящие",
+    "overdue": "Просроченные",
+    "completed": "Завершённые",
+    "addTask": "Добавить задачу",
+    "taskTitle": "Название задачи",
+    "priority": "Приоритет",
+    "high": "Высокий",
+    "medium": "Средний",
+    "low": "Низкий",
+    "scheduledDate": "Запланированная дата",
+    "scheduledTime": "Запланированное время",
+    "duration": "Длительность (минуты)",
+    "markDone": "Отметить выполненной",
+    "skipTask": "Пропустить задачу",
+    "deleteTask": "Удалить задачу",
+    "noTasksAvailable": "Нет доступных задач"
+  },
+  "calendar": {
+    "title": "Календарь",
+    "timeBudget": "Бюджет времени",
+    "peak": "Пик",
+    "dayNames": ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+    "viewMode": {
+      "day": "Д",
+      "threeDays": "3Д",
+      "week": "Н"
+    },
+    "actions": {
+      "split": "Разделить",
+      "snooze15": "Отложить на 15м",
+      "snooze30": "Отложить на 30м",
+      "lock": "Заблокировать",
+      "unlock": "Разблокировать",
+      "done": "Готово",
+      "skip": "Пропустить"
+    },
+    "taskTypes": {
+      "plan": "План",
+      "adhoc": "Срочная",
+      "opportunity": "Возможность",
+      "external": "Внешняя"
+    }
+  },
+  "vision": {
+    "title": "Видение",
+    "createVision": "Создать видение",
+    "scenarios": "Сценарии",
+    "selectScenario": "Выбрать сценарий",
+    "pros": "Плюсы",
+    "cons": "Минусы",
+    "milestones": "Вехи",
+    "progress": "Прогресс",
+    "noVision": "Видение ещё не создано"
+  },
+  "goals": {
+    "title": "Цели",
+    "yourRoadmap": "Ваш план",
+    "noGoals": "Нет созданных целей",
+    "chatToCreate": "Пообщайтесь с AI тренером, чтобы создать первую цель",
+    "progress": "Прогресс",
+    "timeRemaining": "Осталось времени",
+    "linkedTasks": "связанных задач",
+    "status": {
+      "onTrack": "По графику",
+      "atRisk": "Под риском",
+      "stalled": "Остановлено"
+    },
+    "aiRecommendations": "Рекомендации AI",
+    "actions": {
+      "replan": "Перепланировать",
+      "accelerate": "Ускорить",
+      "adjustFocus": "Изменить фокус"
+    },
+    "messages": {
+      "replanned": "Цель успешно перепланирована!",
+      "accelerated": "Цель ускорена на {{days}} дней!",
+      "focusAdjusted": "Фокус успешно изменён!",
+      "error": "Не удалось обновить цель"
+    }
+  },
+  "profile": {
+    "title": "Профиль",
+    "settings": "Настройки",
+    "preferences": "Предпочтения",
+    "language": "Язык",
+    "coachCharacter": "Характер тренера",
+    "energyPeak": "Пик энергии",
+    "morning": "Утро",
+    "afternoon": "День",
+    "evening": "Вечер",
+    "night": "Ночь",
+    "notificationTone": "Тон уведомлений",
+    "gentle": "Мягкий",
+    "firm": "Твёрдый",
+    "motivational": "Мотивирующий",
+    "logout": "Выйти",
+    "deleteAccount": "Удалить аккаунт",
+    "more": "Ещё",
+    "profileInformation": "Информация профиля",
+    "analytics": "Аналитика",
+    "notificationSettings": "Настройки уведомлений",
+    "languageUpdated": "Язык обновлён",
+    "languageUpdatedMessage": "Язык успешно изменён!",
+    "logoutConfirm": "Вы уверены, что хотите выйти?",
+    "startStreak": "Начните свою серию сегодня!",
+    "streakProgress": "{{days}} из последних 5 дней запланировано",
+    "dayStreak": "День подряд",
+    "daysStreak": "Дней подряд"
+  },
+  "notifications": {
+    "settings": {
+      "title": "Уведомления",
+      "types": "Типы уведомлений",
+      "taskReminders": "Напоминания о задачах",
+      "taskRemindersDesc": "Получайте уведомления перед запланированными задачами",
+      "deadlines": "Уведомления о дедлайнах",
+      "deadlinesDesc": "Предупреждения о приближающихся и просроченных задачах",
+      "dailyPulse": "Ежедневный пульс",
+      "dailyPulseDesc": "Вечернее напоминание подвести итоги дня",
+      "aiMotivation": "AI мотивация",
+      "aiMotivationDesc": "Мотивирующие сообщения от вашего AI тренера",
+      "timing": "Настройки времени",
+      "reminderTime": "Время напоминания о задачах",
+      "reminderTimeDesc": "За сколько минут до задачи вас уведомить?",
+      "dailyPulseTime": "Время ежедневного пульса",
+      "quietHours": "Тихие часы",
+      "enableQuietHours": "Включить тихие часы",
+      "quietHoursDesc": "Приостановить уведомления в определённое время",
+      "from": "С",
+      "to": "До",
+      "sendTest": "Отправить тестовое уведомление",
+      "testNotificationSent": "Тест отправлен!",
+      "testNotificationMessage": "Проверьте уведомления, чтобы увидеть как они выглядят",
+      "testNotificationError": "Не удалось отправить тестовое уведомление",
+      "loadError": "Не удалось загрузить настройки уведомлений",
+      "saveError": "Не удалось сохранить настройки"
+    }
+  },
+  "chat": {
+    "title": "Чат",
+    "placeholder": "Сообщение Plano...",
+    "taskCreated": "Задача создана",
+    "taskMarkedDone": "Задача отмечена как выполненная",
+    "reminderSet": "Напоминание установлено"
+  },
+  "taskDetails": {
+    "title": "Детали задачи",
+    "taskNotFound": "Задача не найдена",
+    "askAI": "Спросить AI об этой задаче",
+    "hideAI": "Скрыть AI помощника",
+    "aiAssistant": "AI Помощник",
+    "modes": {
+      "clarify": "🎯 Уточнить",
+      "expand": "🧩 Детализировать",
+      "research": "🔍 Исследовать"
+    },
+    "emptyChat": "Спросите меня что угодно об этой задаче!",
+    "examples": "Примеры: \"Где выполнить это?\", \"Какие документы нужны?\", \"Дай прямую ссылку\"",
+    "aiThinking": "AI думает...",
+    "placeholder": "Задайте вопрос...",
+    "continueResearch": "🔍 Продолжить исследование → полные детали",
+    "sections": {
+      "links": "ССЫЛКИ:",
+      "contacts": "КОНТАКТЫ:",
+      "steps": "ШАГИ:"
+    },
+    "priority": "Приоритет",
+    "addToTasks": "+ Добавить в задачи",
+    "creating": "Создание...",
+    "minutesSuffix": "м"
+  },
+  "taskGenComplete": {
+    "title": "Ваш план готов!",
+    "subtitle": "Создано {{count}} детальных задач с реальными исследованиями",
+    "whatsNext": "Что дальше:",
+    "cards": {
+      "actionItems": {
+        "title": "Детализированные задачи",
+        "description": "Каждая задача включает реальные ссылки, сроки и пошаговое руководство"
+      },
+      "research": {
+        "title": "Реальные данные исследований",
+        "description": "Ссылки на университеты, работу или ресурсы, которые вы выбрали"
+      },
+      "aiReady": {
+        "title": "AI Помощник готов",
+        "description": "Общайтесь с AI чтобы уточнить задачи, задать вопросы или получить помощь"
+      }
+    },
+    "startButton": "Начать!"
+  },
+  "taskGenLoading": {
+    "steps": {
+      "analyze": "Анализируем ваш профиль",
+      "merge": "Обрабатываем ваши ответы",
+      "goals": "Создаём ваши цели",
+      "tasks": "Генерируем персональные задачи",
+      "finalize": "Завершаем создание плана"
+    },
+    "warning": "Пожалуйста, не закрывайте приложение",
+    "processing": "Обработка {{count}} категорий",
+    "error": "Не удалось сгенерировать задачи"
+  },
+  "intro": {
+    "language": {
+      "title": "Выберите язык",
+      "subtitle": "Выберите предпочитаемый язык",
+      "continue": "Продолжить"
+    },
+    "skip": "Пропустить",
+    "next": "Далее",
+    "getStarted": "Начать",
+    "slide1": {
+      "title": "Ваш AI Life Coach",
+      "description": "Plano помогает планировать задачи и достигать целей с помощью искусственного интеллекта",
+      "feature1": "AI Чат-Ассистент",
+      "feature2": "Отслеживание целей",
+      "feature3": "Умное планирование"
+    },
+    "slide2": {
+      "title": "Умное планирование задач",
+      "description": "Интеллектуальное распределение задач с учетом ваших пиков энергии и оптимального времени продуктивности",
+      "feature1": "Определение пиков энергии",
+      "feature2": "Авто-планирование",
+      "feature3": "Оптимизация продуктивности"
+    },
+    "slide3": {
+      "title": "Отслеживайте прогресс",
+      "description": "Визуализация прогресса целей с детальной аналитикой и инсайтами для движения вперед",
+      "feature1": "Визуальный прогресс",
+      "feature2": "Детальная аналитика",
+      "feature3": "Отслеживание вех"
+    },
+    "slide4": {
+      "title": "AI помощник-исследователь",
+      "description": "AI автоматически находит реальные ссылки, контакты и пошаговые инструкции для ваших задач",
+      "feature1": "Реальные URL и ресурсы",
+      "feature2": "Контактная информация",
+      "feature3": "Пошаговые гайды"
+    }
+  }
+}

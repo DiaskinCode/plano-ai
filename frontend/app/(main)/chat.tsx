@@ -1,0 +1,862 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  View,
+  Text,
+  Alert,
+  Animated,
+  StyleSheet,
+  Dimensions,
+  PanResponder,
+  Modal,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { SafeKeyboardProvider } from '@/lib/keyboard';
+import { aiAPI, todosAPI, chatAPI, visionAPI, analyticsAPI, insightsAPI, contextualPulseAPI, voiceAPI } from '@/services/api';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import WeeklyReportBanner from '@/components/WeeklyReportBanner';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import analytics from '@/services/analytics';
+
+// New v0-style components
+import { ChatProvider, useNewMessageAnimation } from '@/lib/chat';
+import LiquidGlassCard from '@/components/LiquidGlassCard';
+import {
+  MessagesList,
+  Composer,
+  ChatSidebar,
+  ChatHeader,
+  HeroSection,
+  ExamplePrompts,
+} from '@/components/chat';
+import { colors, spacing, borderRadius } from '@/theme';
+import { useRouter } from 'expo-router';
+
+const { width } = Dimensions.get('window');
+const SIDEBAR_WIDTH = width * 0.75;
+
+export default function HomeScreen() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const [messages, setMessages] = useState<any[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [dailyHeadline, setDailyHeadline] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  // Conversations
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [currentConversation, setCurrentConversation] = useState<any>(null);
+
+  // Swipeable sidebar
+  const sidebarAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Smart Suggestion Modal
+  const [showSmartSuggestion, setShowSmartSuggestion] = useState(false);
+  const [energyLevel, setEnergyLevel] = useState<'high' | 'medium' | 'low'>('medium');
+  const [availableTime, setAvailableTime] = useState(30);
+  const [currentMood, setCurrentMood] = useState<'motivated' | 'tired' | 'stressed' | null>(null);
+  const [suggestedTask, setSuggestedTask] = useState<any>(null);
+  const [alternatives, setAlternatives] = useState<any[]>([]);
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
+
+  useEffect(() => {
+    requestPermissions();
+    loadConversations();
+    loadDailyHeadline();
+    autoSendDailyPulse();
+  }, []);
+
+  const loadDailyHeadline = async () => {
+    try {
+      const response = await visionAPI.getDailyHeadline();
+      setDailyHeadline(response.data.headline || '');
+    } catch (error) {
+      console.error('Failed to load daily headline:', error);
+    }
+  };
+
+  const autoSendDailyPulse = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const lastSent = await AsyncStorage.getItem('daily_pulse_sent_date');
+
+      if (lastSent === today) return;
+
+      const pulseResponse = await contextualPulseAPI.generate();
+      const pulseData = pulseResponse.data;
+
+      const contextualMessage = `${pulseData.greeting_message}\n\n` +
+        `📋 **Top Priorities:**\n` +
+        pulseData.top_priorities.map((p: any, i: number) =>
+          `${i + 1}. ${p.title}\n   → ${p.reason}`
+        ).join('\n\n') +
+        `\n\n⚡ **Workload:** ${pulseData.workload_assessment.message}\n` +
+        (pulseData.smart_suggestions?.length > 0 ?
+          `\n💡 **Suggestions:**\n${pulseData.smart_suggestions.join('\n')}` : '') +
+        (pulseData.coaching_note ?
+          `\n\n🎯 **Coach's Note:** ${pulseData.coaching_note}` : '');
+
+      await aiAPI.chat(contextualMessage, currentConversation?.id);
+      await AsyncStorage.setItem('daily_pulse_sent_date', today);
+
+      setTimeout(() => {
+        if (currentConversation) {
+          loadConversation(currentConversation.id);
+        }
+      }, 1000);
+    } catch (error: any) {
+      console.error('Failed to auto-send Contextual Daily Pulse:', error);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        await analyticsAPI.sendDailyPulseToChat();
+        await AsyncStorage.setItem('daily_pulse_sent_date', today);
+      } catch (fallbackError) {
+        console.error('Fallback pulse also failed:', fallbackError);
+      }
+    }
+  };
+
+  // Swipe gesture for sidebar
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: (evt) => {
+        return !sidebarOpen && evt.nativeEvent.pageX < 20;
+      },
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return !sidebarOpen && gestureState.dx > 10 && evt.nativeEvent.pageX < 50;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dx > 0 && gestureState.dx < SIDEBAR_WIDTH) {
+          sidebarAnim.setValue(-SIDEBAR_WIDTH + gestureState.dx);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx > SIDEBAR_WIDTH / 3) {
+          openSidebar();
+        } else {
+          closeSidebar();
+        }
+      },
+    })
+  ).current;
+
+  const openSidebar = () => {
+    setSidebarOpen(true);
+    loadConversations();
+    Animated.spring(sidebarAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 8,
+    }).start();
+  };
+
+  const closeSidebar = () => {
+    Animated.spring(sidebarAnim, {
+      toValue: -SIDEBAR_WIDTH,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 8,
+    }).start(() => setSidebarOpen(false));
+  };
+
+  const loadConversations = async () => {
+    try {
+      const response = await chatAPI.getConversations();
+      setConversations(response.data);
+
+      if (response.data.length === 0) {
+        createNewChat();
+      } else if (!currentConversation) {
+        loadConversation(response.data[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to load conversations:', error);
+      if (!currentConversation) {
+        createNewChat();
+      }
+    }
+  };
+
+  const loadConversation = async (conversationId: number) => {
+    try {
+      const response = await chatAPI.getMessages(conversationId);
+      setMessages(response.data);
+      const conv = conversations.find(c => c.id === conversationId);
+      setCurrentConversation(conv);
+    } catch (error) {
+      console.error('Failed to load conversation:', error);
+    }
+  };
+
+  const createNewChat = async () => {
+    try {
+      const response = await chatAPI.createConversation(t('home.newChat'));
+      setCurrentConversation(response.data);
+      setMessages([{
+        role: 'assistant',
+        content: t('home.welcomeMessage'),
+        created_at: new Date().toISOString(),
+      }]);
+      analytics.trackConversationCreated();
+      loadConversations();
+      closeSidebar();
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+    }
+  };
+
+  const deleteConversation = async (conversationId: number) => {
+    Alert.alert(
+      t('home.deleteConversation'),
+      t('home.areYouSure'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await chatAPI.deleteConversation(conversationId);
+              analytics.trackConversationDeleted(conversationId);
+              loadConversations();
+              if (currentConversation?.id === conversationId) {
+                createNewChat();
+              }
+            } catch (error) {
+              console.error('Failed to delete conversation:', error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const requestPermissions = async () => {
+    try {
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+    } catch (error) {
+      console.error('Failed to get audio permissions:', error);
+    }
+  };
+
+  const sendMessage = useCallback(async () => {
+    if (!inputText.trim() || loading) return;
+
+    const text = inputText.trim();
+    analytics.trackChatMessageSent(currentConversation?.id, text.length);
+
+    const userMessage = {
+      id: Date.now(),
+      role: 'user' as const,
+      content: text,
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputText('');
+    setLoading(true);
+    setIsStreaming(true);
+
+    try {
+      const response = await aiAPI.chat(text, currentConversation?.id);
+
+      const aiMessage = {
+        id: Date.now() + 1,
+        role: 'assistant' as const,
+        content: response.data.response,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+
+      if (response.data.conversation_id) {
+        setCurrentConversation({
+          id: response.data.conversation_id,
+          title: response.data.conversation_title
+        });
+      }
+
+      if (response.data.tasks_created && response.data.tasks_created > 0) {
+        Alert.alert(
+          t('home.tasksCreated'),
+          `${response.data.tasks_created} ${t('home.tasksCreatedMessage')}`,
+          [{ text: t('common.confirm') }]
+        );
+      }
+
+      if (response.data.tasks_marked_done && response.data.tasks_marked_done > 0) {
+        Alert.alert(
+          t('home.tasksCompleted'),
+          t('home.tasksCompletedMessage', { count: response.data.tasks_marked_done }),
+          [{ text: t('home.awesome') }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(t('home.error'), t('home.failedToGetResponse'));
+    } finally {
+      setLoading(false);
+      setIsStreaming(false);
+    }
+  }, [inputText, loading, currentConversation?.id, t]);
+
+  const startRecording = async () => {
+    try {
+      const { recording: newRecording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(newRecording);
+      analytics.trackVoiceRecordingStarted();
+    } catch (error) {
+      Alert.alert(t('home.error'), t('home.failedToStartRecording'));
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+
+    try {
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+
+      if (!uri) {
+        Alert.alert(t('home.error'), 'Failed to get recording');
+        setRecording(null);
+        return;
+      }
+
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (!fileInfo.exists || fileInfo.size === 0) {
+        Alert.alert(t('home.error'), 'Recording is empty');
+        setRecording(null);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('audio', {
+        uri,
+        type: 'audio/m4a',
+        name: 'recording.m4a',
+      } as any);
+
+      setLoading(true);
+
+      const transcribeResponse = await aiAPI.transcribeAudio(formData);
+      const transcription = transcribeResponse.data.transcription;
+
+      try {
+        const voiceResponse = await voiceAPI.processCommand(
+          transcription,
+          new Date().toISOString()
+        );
+
+        if (voiceResponse.data.success) {
+          const intent = voiceResponse.data.intent;
+
+          if (intent === 'create_task') {
+            Alert.alert('✓ Task Created', voiceResponse.data.response_text);
+          } else if (intent === 'complete_task') {
+            Alert.alert('✓ Task Completed', voiceResponse.data.response_text);
+          } else {
+            setInputText(transcription);
+          }
+        } else {
+          setInputText(transcription);
+        }
+      } catch (voiceError) {
+        setInputText(transcription);
+      }
+
+      setRecording(null);
+      setLoading(false);
+    } catch (error) {
+      Alert.alert(t('home.error'), t('home.failedToTranscribe'));
+      setRecording(null);
+      setLoading(false);
+    }
+  };
+
+  const handleGetSmartSuggestion = async () => {
+    try {
+      setLoadingSuggestion(true);
+      const response = await insightsAPI.suggestSmart({
+        current_energy: energyLevel,
+        available_minutes: availableTime,
+        current_mood: currentMood || undefined,
+      });
+
+      if (response.data.suggested_task) {
+        setSuggestedTask(response.data.suggested_task);
+        setAlternatives(response.data.alternatives || []);
+      } else {
+        Alert.alert('No Tasks Found', response.data.message || 'No suitable tasks available right now.');
+        setShowSmartSuggestion(false);
+      }
+    } catch (error) {
+      console.error('Smart suggestion error:', error);
+      Alert.alert('Error', 'Failed to get smart suggestion. Please try again.');
+    } finally {
+      setLoadingSuggestion(false);
+    }
+  };
+
+  const handleSelectPrompt = (prompt: string) => {
+    setInputText(prompt);
+  };
+
+  const handleAnalyticsPress = () => {
+    router.push('/(main)/analytics');
+  };
+
+  const showEmptyState = messages.length === 0 && !inputText && dailyHeadline;
+
+  return (
+    <SafeKeyboardProvider>
+      <ChatProvider chatId={currentConversation?.id}>
+        <View style={styles.container} {...panResponder.panHandlers}>
+          {/* Sidebar */}
+          <ChatSidebar
+            isOpen={sidebarOpen}
+            sidebarAnim={sidebarAnim}
+            conversations={conversations}
+            currentConversationId={currentConversation?.id}
+            onClose={closeSidebar}
+            onNewChat={createNewChat}
+            onSelectConversation={(id) => {
+              loadConversation(id);
+              closeSidebar();
+            }}
+            onDeleteConversation={deleteConversation}
+            t={t}
+          />
+
+          {/* Main Content */}
+          <View style={styles.mainContent}>
+            {/* Header */}
+            <ChatHeader
+              onMenuPress={openSidebar}
+              onBackPress={() => router.back()}
+              onActionPress={handleAnalyticsPress}
+            />
+
+            {/* Hero Section for empty state */}
+            {showEmptyState && (
+              <>
+                <HeroSection
+                  headline={dailyHeadline}
+                  subtitle={t('home.keepGoing')}
+                />
+                <WeeklyReportBanner />
+              </>
+            )}
+
+            {/* Messages List */}
+            <MessagesList
+              messages={messages}
+              isStreaming={isStreaming}
+            />
+
+            {/* Example Prompts for empty state */}
+            {messages.length === 0 && (
+              <ExamplePrompts onSelectPrompt={handleSelectPrompt} />
+            )}
+
+            {/* Floating Composer */}
+            <Composer
+              value={inputText}
+              onChangeText={setInputText}
+              onSend={sendMessage}
+              onVoiceStart={startRecording}
+              onVoiceStop={stopRecording}
+              isRecording={!!recording}
+              isLoading={loading}
+              placeholder={t('home.placeholderMessage')}
+            />
+          </View>
+
+          {/* Smart Suggestion Modal */}
+          <Modal
+            visible={showSmartSuggestion}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => setShowSmartSuggestion(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.smartSuggestionContainer}>
+                <LiquidGlassCard variant="elevated" intensity="heavy" interactive={false}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalHeaderTitle}>🎲 Smart Task Suggestion</Text>
+                    <TouchableOpacity onPress={() => setShowSmartSuggestion(false)}>
+                      <MaterialCommunityIcons name="close" size={24} color={colors.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+
+                  {!suggestedTask ? (
+                    <ScrollView style={styles.modalContent}>
+                      <Text style={styles.sectionLabel}>How's your energy?</Text>
+                      <View style={styles.optionsRow}>
+                        {(['low', 'medium', 'high'] as const).map((level) => (
+                          <TouchableOpacity
+                            key={level}
+                            style={[styles.optionButton, energyLevel === level && styles.optionButtonActive]}
+                            onPress={() => setEnergyLevel(level)}
+                          >
+                            <MaterialCommunityIcons
+                              name={level === 'high' ? 'flash' : level === 'medium' ? 'battery-medium' : 'weather-night'}
+                              size={20}
+                              color={energyLevel === level ? '#fff' : colors.textSecondary}
+                            />
+                            <Text style={[styles.optionText, energyLevel === level && styles.optionTextActive]}>
+                              {level.charAt(0).toUpperCase() + level.slice(1)}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+
+                      <Text style={styles.sectionLabel}>How much time do you have?</Text>
+                      <View style={styles.optionsRow}>
+                        {[15, 30, 45, 60].map((time) => (
+                          <TouchableOpacity
+                            key={time}
+                            style={[styles.timeButton, availableTime === time && styles.timeButtonActive]}
+                            onPress={() => setAvailableTime(time)}
+                          >
+                            <Text style={[styles.timeText, availableTime === time && styles.timeTextActive]}>
+                              {time}m
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+
+                      <Text style={styles.sectionLabel}>Current mood (optional)</Text>
+                      <View style={styles.optionsRow}>
+                        {([null, 'motivated', 'tired', 'stressed'] as const).map((mood) => (
+                          <TouchableOpacity
+                            key={mood || 'none'}
+                            style={[styles.moodButton, currentMood === mood && styles.moodButtonActive]}
+                            onPress={() => setCurrentMood(mood)}
+                          >
+                            <Text style={[styles.moodText, currentMood === mood && styles.moodTextActive]}>
+                              {mood ? mood.charAt(0).toUpperCase() + mood.slice(1) : 'Any'}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+
+                      <TouchableOpacity
+                        style={styles.getSuggestionButton}
+                        onPress={handleGetSmartSuggestion}
+                        disabled={loadingSuggestion}
+                      >
+                        <Text style={styles.getSuggestionText}>
+                          {loadingSuggestion ? 'Finding perfect task...' : 'Get Suggestion'}
+                        </Text>
+                      </TouchableOpacity>
+                    </ScrollView>
+                  ) : (
+                    <ScrollView style={styles.modalContent}>
+                      <View style={styles.suggestedTaskCard}>
+                        <Text style={styles.suggestedLabel}>Suggested Task</Text>
+                        <Text style={styles.suggestedTitle}>{suggestedTask.title}</Text>
+                        <View style={styles.taskPropertiesRow}>
+                          <View style={styles.taskProperty}>
+                            <MaterialCommunityIcons
+                              name={suggestedTask.energy_level === 'high' ? 'flash' : suggestedTask.energy_level === 'medium' ? 'battery-medium' : 'weather-night'}
+                              size={16}
+                              color={colors.primary}
+                            />
+                            <Text style={styles.propertyText}>{suggestedTask.energy_level}</Text>
+                          </View>
+                          <View style={styles.taskProperty}>
+                            <MaterialCommunityIcons name="clock-outline" size={16} color={colors.primary} />
+                            <Text style={styles.propertyText}>{suggestedTask.timebox_minutes}min</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.suggestionReason}>📝 {suggestedTask.reason}</Text>
+                      </View>
+
+                      {alternatives.length > 0 && (
+                        <>
+                          <Text style={styles.alternativesLabel}>Alternatives</Text>
+                          {alternatives.map((alt: any) => (
+                            <View key={alt.id} style={styles.alternativeCard}>
+                              <Text style={styles.alternativeTitle}>{alt.title}</Text>
+                              <Text style={styles.alternativeMeta}>
+                                {alt.energy_level} • {alt.timebox_minutes}min
+                              </Text>
+                            </View>
+                          ))}
+                        </>
+                      )}
+
+                      <View style={styles.suggestionActions}>
+                        <TouchableOpacity
+                          style={styles.tryAgainButton}
+                          onPress={() => {
+                            setSuggestedTask(null);
+                            setAlternatives([]);
+                          }}
+                        >
+                          <Text style={styles.tryAgainText}>Try Again</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.closeModalButton}
+                          onPress={() => setShowSmartSuggestion(false)}
+                        >
+                          <Text style={styles.closeModalText}>Close</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </ScrollView>
+                  )}
+                </LiquidGlassCard>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      </ChatProvider>
+    </SafeKeyboardProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  mainContent: {
+    flex: 1,
+    position: 'relative',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  smartSuggestionContainer: {
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalHeaderTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  modalContent: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  sectionLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: spacing.sm,
+    marginTop: spacing.md,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: spacing.sm,
+  },
+  optionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+  },
+  optionButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  optionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  optionTextActive: {
+    color: '#fff',
+  },
+  timeButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+  },
+  timeButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  timeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  timeTextActive: {
+    color: '#fff',
+  },
+  moodButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+  },
+  moodButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  moodText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  moodTextActive: {
+    color: '#fff',
+  },
+  getSuggestionButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
+  },
+  getSuggestionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  suggestedTaskCard: {
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  suggestedLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary,
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
+  suggestedTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  taskPropertiesRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  taskProperty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  propertyText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  suggestionReason: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.text,
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  alternativesLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+  },
+  alternativeCard: {
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    padding: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  alternativeTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  alternativeMeta: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  suggestionActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  tryAgainButton: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 14,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+  },
+  tryAgainText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  closeModalButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+  },
+  closeModalText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+});

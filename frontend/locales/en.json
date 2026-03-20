@@ -1,0 +1,349 @@
+{
+  "common": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "streak": "Streak",
+    "tasks": "Tasks",
+    "done": "Done",
+    "pending": "Pending",
+    "skip": "Skip",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm"
+  },
+  "navigation": {
+    "chat": "Chat",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "vision": "Vision",
+    "goals": "Goals",
+    "community": "Community",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "welcomeBack": "Welcome Back",
+    "welcomeBackSubtitle": "Sign in to continue your journey",
+    "createAccount": "Create Account",
+    "joinPlano": "Join Plano",
+    "startJourney": "Start your journey with Plano",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "loggingIn": "Logging in...",
+    "creatingAccount": "Creating Account...",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "registerLink": "Register",
+    "loginLink": "Login"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Plano",
+    "getStarted": "Get Started",
+    "name": "What's your name?",
+    "age": "How old are you?",
+    "goals": "What are your goals?",
+    "dreamCareer": "What's your dream career?",
+    "budget": "What's your budget?",
+    "timeline": "What's your timeline?",
+    "chooseCoach": "Choose Your Coach",
+    "aggressive": "Aggressive",
+    "cute": "Cute",
+    "supportive": "Supportive",
+    "professional": "Professional",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish"
+  },
+  "home": {
+    "goodMorning": "Good Morning",
+    "goodAfternoon": "Good Afternoon",
+    "goodEvening": "Good Evening",
+    "dailyHeadline": "Daily Headline",
+    "quickStats": "Quick Stats",
+    "tasksDone": "Tasks Done",
+    "tasksRemaining": "Tasks Remaining",
+    "upcomingTasks": "Upcoming Tasks",
+    "noTasks": "No tasks for today",
+    "createTask": "Create Task",
+    "vision": "Vision",
+    "newChat": "New Chat",
+    "deleteConversation": "Delete Conversation",
+    "areYouSure": "Are you sure?",
+    "messages": "messages",
+    "welcomeMessage": "Hello! I'm your AI life coach. How can I help you today?",
+    "keepGoing": "Keep going",
+    "streak": "Streak",
+    "tasksCreated": "Tasks Created",
+    "tasksCreatedMessage": "task(s) added to your todo list!",
+    "tasksCompleted": "Tasks Completed",
+    "tasksCompletedMessage": "Marked {{count}} task(s) as done! 🎉",
+    "awesome": "Awesome!",
+    "error": "Error",
+    "failedToGetResponse": "Failed to get AI response",
+    "failedToStartRecording": "Failed to start recording",
+    "failedToTranscribe": "Failed to transcribe audio",
+    "placeholderMessage": "Message Plano..."
+  },
+  "tasks": {
+    "title": "Tasks",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "upcoming": "Upcoming",
+    "overdue": "Overdue",
+    "completed": "Completed",
+    "addTask": "Add Task",
+    "taskTitle": "Task Title",
+    "priority": "Priority",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "scheduledDate": "Scheduled Date",
+    "scheduledTime": "Scheduled Time",
+    "duration": "Duration (minutes)",
+    "markDone": "Mark Done",
+    "skipTask": "Skip Task",
+    "deleteTask": "Delete Task",
+    "noTasksAvailable": "No tasks available"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "timeBudget": "Time budget",
+    "peak": "Peak",
+    "dayNames": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "viewMode": {
+      "day": "D",
+      "threeDays": "3D",
+      "week": "W"
+    },
+    "actions": {
+      "split": "Split",
+      "snooze15": "Snooze 15m",
+      "snooze30": "Snooze 30m",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "done": "Done",
+      "skip": "Skip"
+    },
+    "taskTypes": {
+      "plan": "Plan",
+      "adhoc": "Ad hoc",
+      "opportunity": "Opportunity",
+      "external": "External"
+    }
+  },
+  "vision": {
+    "title": "Vision",
+    "createVision": "Create Vision",
+    "scenarios": "Scenarios",
+    "selectScenario": "Select Scenario",
+    "pros": "Pros",
+    "cons": "Cons",
+    "milestones": "Milestones",
+    "progress": "Progress",
+    "noVision": "No vision created yet"
+  },
+  "goals": {
+    "title": "Goals",
+    "yourRoadmap": "Your Roadmap",
+    "noGoals": "No goals created yet",
+    "chatToCreate": "Chat with your AI coach to create your first goal",
+    "progress": "Progress",
+    "timeRemaining": "Time remaining",
+    "linkedTasks": "linked tasks",
+    "status": {
+      "onTrack": "On track",
+      "atRisk": "At risk",
+      "stalled": "Stalled"
+    },
+    "aiRecommendations": "AI Recommendations",
+    "actions": {
+      "replan": "Replan",
+      "accelerate": "Accelerate",
+      "adjustFocus": "Adjust Focus"
+    },
+    "messages": {
+      "replanned": "Goal has been replanned successfully!",
+      "accelerated": "Goal accelerated by {{days}} days!",
+      "focusAdjusted": "Focus adjusted successfully!",
+      "error": "Failed to update goal"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "preferences": "Preferences",
+    "language": "Language",
+    "coachCharacter": "Coach Character",
+    "energyPeak": "Energy Peak",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "notificationTone": "Notification Tone",
+    "gentle": "Gentle",
+    "firm": "Firm",
+    "motivational": "Motivational",
+    "logout": "Logout",
+    "deleteAccount": "Delete Account",
+    "more": "More",
+    "profileInformation": "Profile Information",
+    "analytics": "Analytics",
+    "notificationSettings": "Notification Settings",
+    "languageUpdated": "Language Updated",
+    "languageUpdatedMessage": "Language has been changed successfully!",
+    "logoutConfirm": "Are you sure you want to logout?",
+    "startStreak": "Start your streak today!",
+    "streakProgress": "{{days}} of last 5 days planned",
+    "dayStreak": "Day Streak",
+    "daysStreak": "Days Streak"
+  },
+  "notifications": {
+    "settings": {
+      "title": "Notifications",
+      "types": "Notification Types",
+      "taskReminders": "Task Reminders",
+      "taskRemindersDesc": "Get notified before your scheduled tasks",
+      "deadlines": "Deadline Alerts",
+      "deadlinesDesc": "Alerts for approaching and overdue tasks",
+      "dailyPulse": "Daily Pulse",
+      "dailyPulseDesc": "Evening reminder to reflect on your day",
+      "aiMotivation": "AI Motivation",
+      "aiMotivationDesc": "Motivational messages from your AI coach",
+      "timing": "Timing Settings",
+      "reminderTime": "Task Reminder Timing",
+      "reminderTimeDesc": "How many minutes before tasks should we notify you?",
+      "dailyPulseTime": "Daily Pulse Time",
+      "quietHours": "Quiet Hours",
+      "enableQuietHours": "Enable Quiet Hours",
+      "quietHoursDesc": "Pause notifications during specific times",
+      "from": "From",
+      "to": "To",
+      "sendTest": "Send Test Notification",
+      "testNotificationSent": "Test Sent!",
+      "testNotificationMessage": "Check your notifications to see how they look",
+      "testNotificationError": "Failed to send test notification",
+      "loadError": "Failed to load notification settings",
+      "saveError": "Failed to save settings"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Message Plano...",
+    "taskCreated": "Task created",
+    "taskMarkedDone": "Task marked as done",
+    "reminderSet": "Reminder set"
+  },
+  "taskDetails": {
+    "title": "Task Details",
+    "taskNotFound": "Task Not Found",
+    "askAI": "Ask AI About This Task",
+    "hideAI": "Hide AI Assistant",
+    "aiAssistant": "AI Assistant",
+    "modes": {
+      "clarify": "🎯 Clarify",
+      "expand": "🧩 Expand",
+      "research": "🔍 Research"
+    },
+    "emptyChat": "Ask me anything about this task!",
+    "examples": "Examples: \"Where do I complete this?\", \"What documents do I need?\", \"Give me the direct link\"",
+    "aiThinking": "AI is thinking...",
+    "placeholder": "Ask a question...",
+    "continueResearch": "🔍 Continue research → full details",
+    "sections": {
+      "links": "LINKS:",
+      "contacts": "CONTACTS:",
+      "steps": "STEPS:"
+    },
+    "priority": "Priority",
+    "addToTasks": "+ Add to Tasks",
+    "creating": "Creating...",
+    "minutesSuffix": "m"
+  },
+  "taskGenComplete": {
+    "title": "Your Plan is Ready!",
+    "subtitle": "Created {{count}} detailed tasks with real research",
+    "whatsNext": "What's next:",
+    "cards": {
+      "actionItems": {
+        "title": "Detailed Action Items",
+        "description": "Each task includes real URLs, deadlines, and step-by-step guidance"
+      },
+      "research": {
+        "title": "Real Research Data",
+        "description": "Links to actual universities, jobs, or resources you selected"
+      },
+      "aiReady": {
+        "title": "AI Assistant Ready",
+        "description": "Chat with AI to refine tasks, ask questions, or get help"
+      }
+    },
+    "startButton": "Let's Start!"
+  },
+  "taskGenLoading": {
+    "steps": {
+      "analyze": "Analyzing your profile",
+      "merge": "Processing your answers",
+      "goals": "Creating your goals",
+      "tasks": "Generating personalized tasks",
+      "finalize": "Finalizing your plan"
+    },
+    "warning": "Please don't close the app",
+    "processing": "Processing {{count}} categories",
+    "error": "Failed to generate tasks"
+  },
+  "intro": {
+    "language": {
+      "title": "Choose Your Language",
+      "subtitle": "Select your preferred language",
+      "continue": "Continue"
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "slide1": {
+      "title": "Your AI Life Coach",
+      "description": "Plano helps you plan tasks and achieve goals with the power of artificial intelligence",
+      "feature1": "AI Chat Assistant",
+      "feature2": "Goal Tracking",
+      "feature3": "Smart Planning"
+    },
+    "slide2": {
+      "title": "Smart Task Scheduling",
+      "description": "Intelligent task distribution based on your energy peaks and optimal productivity times",
+      "feature1": "Energy Peak Detection",
+      "feature2": "Auto-Scheduling",
+      "feature3": "Productivity Optimization"
+    },
+    "slide3": {
+      "title": "Track Your Progress",
+      "description": "Visualize goal progress with detailed analytics and insights to stay on track",
+      "feature1": "Visual Progress",
+      "feature2": "Detailed Analytics",
+      "feature3": "Milestone Tracking"
+    },
+    "slide4": {
+      "title": "AI Research Assistant",
+      "description": "AI finds real links, contacts, and step-by-step instructions for your tasks automatically",
+      "feature1": "Real URLs & Resources",
+      "feature2": "Contact Information",
+      "feature3": "Step-by-Step Guides"
+    }
+  }
+}
