@@ -1,0 +1,122 @@
+[
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 1,
+    "fields": {
+      "key": "passport_valid",
+      "category": "docs",
+      "title": "Valid Passport",
+      "description": "Upload a scan of your passport. Must be valid for at least 6 months beyond your program start date.",
+      "default_evidence_fields": ["passport_expiry_date", "passport_scan"],
+      "default_link_url": "https://www.gov.uk/passport-application",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 2,
+    "fields": {
+      "key": "ielts_academic",
+      "category": "docs",
+      "title": "IELTS Academic Test",
+      "description": "Take IELTS Academic. Most universities require 6.5+ overall with no band below 6.0.",
+      "default_evidence_fields": ["test_date", "overall_score", "listening", "reading", "writing", "speaking", "trf_number"],
+      "default_link_url": "https://www.ielts.org/for-organisations/recognising-organisations",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 3,
+    "fields": {
+      "key": "toefl_ibit",
+      "category": "docs",
+      "title": "TOEFL iBT Test",
+      "description": "Take TOEFL iBT. Most universities require 90+ overall with minimum section scores.",
+      "default_evidence_fields": ["test_date", "overall_score", "section_scores"],
+      "default_link_url": "https://www.ets.org/toefl",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 4,
+    "fields": {
+      "key": "academic_transcripts",
+      "category": "docs",
+      "title": "Academic Transcripts",
+      "description": "Official academic transcripts from your previous institution showing all courses and grades.",
+      "default_evidence_fields": ["transcript_pdf", "transcript_translation"],
+      "default_link_url": "",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 5,
+    "fields": {
+      "key": "cv_resume",
+      "category": "docs",
+      "title": "CV/Resume",
+      "description": "Current curriculum vitae or resume detailing your education, work experience, skills, and achievements.",
+      "default_evidence_fields": ["cv_file"],
+      "default_link_url": "",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 6,
+    "fields": {
+      "key": "personal_statement",
+      "category": "apply",
+      "title": "Personal Statement",
+      "description": "A statement explaining your academic interests, career goals, and why you're applying to these programs.",
+      "default_evidence_fields": ["statement_pdf"],
+      "default_link_url": "",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 7,
+    "fields": {
+      "key": "recommendation_letters",
+      "category": "apply",
+      "title": "Letters of Recommendation",
+      "description": "2-3 letters of recommendation from teachers or professors who can speak to your academic abilities.",
+      "default_evidence_fields": ["recommender_names", "recommendation_files"],
+      "default_link_url": "",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 8,
+    "fields": {
+      "key": "portfolio",
+      "category": "apply",
+      "title": "Portfolio",
+      "description": "Collection of your best creative work demonstrating your skills and experience. Required for Architecture and Design programs.",
+      "default_evidence_fields": ["portfolio_pdf", "portfolio_link"],
+      "default_link_url": "",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

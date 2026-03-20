@@ -1,0 +1,23 @@
+NEW MENTOR APPLICATION
+
+A new mentor has submitted their application for verification.
+
+MENTOR DETAILS
+--------------
+Name: {{ mentor.title }}
+Email: {{ mentor.user.email }}
+Education: {{ mentor.education|default:"Not provided" }}
+
+Bio:
+{{ mentor.bio|truncatewords:30 }}
+
+Expertise:
+{{ mentor.expertise_areas|join:", "|default:"Not provided" }}
+
+Submitted: {{ mentor.verification_submitted_at|date:"F j, Y, g:i a" }}
+
+{% if mentor.verification_video_url %}Video Introduction: {{ mentor.verification_video_url }}{% endif %}
+
+REVIEW APPLICATION
+-----------------
+{{ admin_url }}

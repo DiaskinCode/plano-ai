@@ -1,0 +1,19 @@
+CONGRATULATIONS! YOUR MENTOR PROFILE IS APPROVED
+
+Hi {{ mentor.title }},
+
+We're excited to inform you that your mentor profile has been approved!
+
+Your profile is now live in our mentor directory and students can start booking sessions with you.
+
+NEXT STEPS
+-----------
+1. Set up your availability in the Mentor Dashboard
+2. Configure your meeting link if needed
+3. Watch for booking notifications
+4. Complete your first session and get reviews!
+
+Dashboard: {{ dashboard_url }}
+
+Best regards,
+The PathAI Team

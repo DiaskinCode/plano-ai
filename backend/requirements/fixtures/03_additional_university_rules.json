@@ -1,0 +1,172 @@
+[
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 50,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 8,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 51,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 8,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 52,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 8,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "Brown University Personal Statement"},
+      "link_url": "https://www.brown.edu/admission/apply",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 53,
+    "fields": {
+      "template": 7,
+      "scope": "university",
+      "university": 8,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 60,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 74,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 61,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 74,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 62,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 74,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "Bocconi University Motivation Letter"},
+      "link_url": "https://www.unibocconi.eu/admission",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 70,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 56,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 71,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 56,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 72,
+    "fields": {
+      "template": 2,
+      "scope": "university",
+      "university": 56,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "warning",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

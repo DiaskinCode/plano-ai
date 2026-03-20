@@ -1,0 +1,262 @@
+[
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 100,
+    "fields": {
+      "key": "italy_student_visa",
+      "title": "Italy Student Visa (Type D)",
+      "description": "Apply for student visa at Italian Embassy. Requires offer letter, proof of funds, health insurance, and accommodation.",
+      "scope": "country",
+      "country": "IT",
+      "requirement_type": "visa",
+      "verification_level": "official",
+      "official_source_url": "https://vistopermaria.esteri.it",
+      "official_source_label": "Italian Embassy",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 10.0,
+      "document_rules": {
+        "format": "In-person appointment",
+        "documents": [
+          "Passport valid 3+ months",
+          "Offer letter",
+          "Proof of funds (€6,000/year)",
+          "Health insurance (€30,000 coverage)",
+          "Accommodation contract",
+          "Flight reservation"
+        ],
+        "embassy_url": "https://ambconsaratna.esteri.it"
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": [],
+      "activation_rule": "offer_received"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 101,
+    "fields": {
+      "key": "italy_dichiarazione_valore",
+      "title": "Dichiarazione di Valore (Declaration of Value)",
+      "description": "Official declaration of your educational qualifications for Italian universities.",
+      "scope": "country",
+      "country": "IT",
+      "requirement_type": "document",
+      "verification_level": "official",
+      "official_source_url": "https://ambconsaratna.esteri.it",
+      "official_source_label": "Italian Embassy",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 5.0,
+      "document_rules": {
+        "format": "Original document",
+        "details": "Request from Italian Embassy in your country",
+        "notarized": true,
+        "translation_required": true
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 200,
+    "fields": {
+      "key": "uk_student_visa",
+      "title": "UK Student Visa",
+      "description": "Apply for Tier 4 student visa. Requires CAS number from university, proof of funds, and tuberculosis test.",
+      "scope": "country",
+      "country": "GB",
+      "requirement_type": "visa",
+      "verification_level": "official",
+      "official_source_url": "https://www.gov.uk/student-visa",
+      "official_source_label": "UK Visas and Immigration",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 8.0,
+      "document_rules": {
+        "format": "Online application",
+        "documents": [
+          "CAS number from university",
+          "Proof of funds (£1,334/month for 9 months)",
+          "Tuberculosis test certificate",
+          "Passport",
+          "IELTS certificate"
+        ]
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": [],
+      "activation_rule": "offer_received"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 201,
+    "fields": {
+      "key": "uk_tb_test",
+      "title": "Tuberculosis Test",
+      "description": "Tuberculosis screening test required for UK student visa from certain countries.",
+      "scope": "country",
+      "country": "GB",
+      "requirement_type": "medical",
+      "verification_level": "vendor",
+      "official_source_url": "https://www.gov.uk/tb-test-visa",
+      "official_source_label": "UK Home Office",
+      "min_days_before_deadline": 45,
+      "estimated_effort_hours": 3.0,
+      "document_rules": {
+        "format": "Certificate from approved clinic",
+        "how_to": "Book appointment at approved clinic",
+        "valid_for": "6 months"
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 300,
+    "fields": {
+      "key": "canada_student_visa",
+      "title": "Canada Study Permit",
+      "description": "Apply for study permit. Requires acceptance letter, proof of funds, and may require biometrics.",
+      "scope": "country",
+      "country": "CA",
+      "requirement_type": "visa",
+      "verification_level": "official",
+      "official_source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada.html",
+      "official_source_label": "IRCC",
+      "min_days_before_deadline": 45,
+      "estimated_effort_hours": 10.0,
+      "document_rules": {
+        "format": "Online application",
+        "documents": [
+          "Acceptance letter",
+          "Proof of funds (CAD $10,000/year + tuition)",
+          "Passport",
+          "Photos",
+          "Statement of purpose",
+          "Biometric fee receipt"
+        ]
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": [],
+      "activation_rule": "offer_received"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 301,
+    "fields": {
+      "key": "canada_biometrics",
+      "title": "Biometrics Appointment",
+      "description": "Give fingerprints and photo at a Visa Application Centre.",
+      "scope": "country",
+      "country": "CA",
+      "requirement_type": "visa",
+      "verification_level": "vendor",
+      "official_source_url": "https://canada.ca/en/immigration-refugees-citizenship/services/application/biometrics.html",
+      "official_source_label": "IRCC",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "In-person appointment",
+        "how_to": "Book after submitting visa application",
+        "fee": "CAD $85"
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": ["canada_student_visa"],
+      "activation_rule": "offer_received"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 400,
+    "fields": {
+      "key": "netherlands_student_visa",
+      "title": "Netherlands Residence Permit",
+      "description": "Apply for residence permit for study purpose. University applies on your behalf after enrollment.",
+      "scope": "country",
+      "country": "NL",
+      "requirement_type": "visa",
+      "verification_level": "official",
+      "official_source_url": "https://ind.nl/en/Residence-permit/Study",
+      "official_source_label": "Netherlands Immigration",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 3.0,
+      "document_rules": {
+        "format": "University submits application",
+        "documents": [
+          "Passport copy",
+          "Birth certificate",
+          "Proof of financial means"
+        ]
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": [],
+      "activation_rule": "enrollment_confirmed"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 500,
+    "fields": {
+      "key": "usa_student_visa",
+      "title": "US F-1 Student Visa",
+      "description": "Apply for F-1 visa after receiving I-20 form from university. Requires visa interview at US embassy.",
+      "scope": "country",
+      "country": "US",
+      "requirement_type": "visa",
+      "verification_level": "official",
+      "official_source_url": "https://travel.state.gov/content/travel/en/us-visas/study.html",
+      "official_source_label": "US Department of State",
+      "min_days_before_deadline": 45,
+      "estimated_effort_hours": 10.0,
+      "document_rules": {
+        "format": "In-person interview",
+        "documents": [
+          "I-20 form from university",
+          "DS-160 confirmation",
+          "Visa fee receipt",
+          "SEVIS fee receipt",
+          "Passport",
+          "Financial documents"
+        ]
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": [],
+      "activation_rule": "i_20_received"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 501,
+    "fields": {
+      "key": "usa_sevis_fee",
+      "title": "SEVIS Fee Payment",
+      "description": "Pay the SEVIS I-901 fee required for F-1 visa application.",
+      "scope": "country",
+      "country": "US",
+      "requirement_type": "visa",
+      "verification_level": "official",
+      "official_source_url": "https://www.fmjfee.com",
+      "official_source_label": "SEVP",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 0.5,
+      "document_rules": {
+        "format": "Online payment",
+        "fee": "$350",
+        "how_to": "Pay at fmjfee.com after receiving I-20"
+      },
+      "reusable_across_targets": true,
+      "post_offer_only": true,
+      "dependency_keys": [],
+      "activation_rule": "i_20_received"
+    }
+  }
+]

@@ -1,0 +1,17 @@
+MENTOR PROFILE UPDATE
+
+Hi {{ mentor.title }},
+
+Thank you for your interest in becoming a mentor. After reviewing your application,
+we're unable to approve your profile at this time.
+
+{% if reason %}FEEDBACK:
+{{ reason }}
+{% endif %}
+
+We encourage you to review the feedback and update your profile for reconsideration.
+
+Update your profile: {{ profile_url }}
+
+Best regards,
+The PathAI Team

@@ -1,0 +1,12 @@
+YOUR MENTOR ACCOUNT HAS BEEN REINSTATED
+
+Hi {{ mentor.title }},
+
+Good news! Your mentor account has been reinstated after review.
+
+You can now continue accepting bookings and providing mentorship services.
+
+Dashboard: {{ dashboard_url }}
+
+Best regards,
+The PathAI Team

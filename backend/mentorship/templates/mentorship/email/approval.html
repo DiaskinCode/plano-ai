@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #10B981; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { background: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #10B981;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .checkmark { font-size: 48px; text-align: center; margin: 20px 0; }
+        .steps { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .steps ol { padding-left: 20px; }
+        .steps li { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="checkmark">🎉</div>
+            <h2>Congratulations!</h2>
+        </div>
+        <div class="content">
+            <p>Hi <strong>{{ mentor.title }}</strong>,</p>
+            <p>We're excited to inform you that your mentor profile has been <strong>approved</strong>!</p>
+            <p>Your profile is now live in our mentor directory and students can start booking sessions with you.</p>
+
+            <div class="steps">
+                <h3>Next Steps:</h3>
+                <ol>
+                    <li>Set up your availability in the <a href="{{ dashboard_url }}">Mentor Dashboard</a></li>
+                    <li>Configure your meeting link if needed</li>
+                    <li>Watch for booking notifications</li>
+                    <li>Complete your first session and get reviews!</li>
+                </ol>
+            </div>
+
+            <p style="text-align: center; margin-top: 30px;">
+                <a href="{{ dashboard_url }}" class="button">Go to Dashboard</a>
+            </p>
+
+            <p style="margin-top: 30px; color: #666; font-size: 14px;">
+                Best regards,<br>
+                The PathAI Team
+            </p>
+        </div>
+    </div>
+</body>
+</html>

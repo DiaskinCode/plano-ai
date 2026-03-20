@@ -1,0 +1,470 @@
+[
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 1000,
+    "fields": {
+      "key": "polimi_application_portal",
+      "title": "Politecnico di Milano Application Portal",
+      "description": "Submit online application through the Politecnico di Milano online service.",
+      "scope": "university",
+      "university_id": 68,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://www.polimi.it/en/international-prospective-students/application-procedures/",
+      "official_source_label": "Politecnico di Milano Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "Online form",
+        "fee": "€50"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 1001,
+    "fields": {
+      "key": "polimi_motivation_letter",
+      "title": "Politecnico di Milano Motivation Letter",
+      "description": "Explain why you want to study your chosen program at Politecnico di Milano. Focus on your academic background, relevant experience, and career goals.",
+      "scope": "university",
+      "university_id": 68,
+      "requirement_type": "essay",
+      "verification_level": "official",
+      "official_source_url": "https://www.polimi.it/en/international-prospective-students/application-procedures/",
+      "official_source_label": "Politecnico di Milano Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 5.0,
+      "document_rules": {
+        "format": "PDF",
+        "length": "1-2 pages"
+      },
+      "prompt_text": "Describe your motivation for applying to this program. Include your academic background, relevant projects or work experience, and how this program fits your career goals.",
+      "evaluation_criteria": [
+        "Clarity of motivation",
+        "Relevance of academic background",
+        "Career alignment",
+        "Knowledge of program"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 1002,
+    "fields": {
+      "key": "polimi_portfolio",
+      "title": "Politecnico di Milano Architecture Portfolio",
+      "description": "Portfolio of your design and creative work for Architecture programs. Must show technical and design skills.",
+      "scope": "university",
+      "university_id": 68,
+      "requirement_type": "other",
+      "verification_level": "official",
+      "official_source_url": "https://www.polimi.it/en/international-prospective-students/application-procedures/",
+      "official_source_label": "Politecnico di Milano School of Architecture",
+      "min_days_before_deadline": 21,
+      "estimated_effort_hours": 25.0,
+      "document_rules": {
+        "format": "PDF",
+        "max_size_mb": 15,
+        "max_pages": 20
+      },
+      "prompt_text": "Submit a portfolio demonstrating your design skills and creative work. Include academic projects, personal work, and any professional experience.",
+      "evaluation_criteria": [
+        "Design quality",
+        "Technical skills",
+        "Creativity",
+        "Presentation",
+        "Variety of work"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": [],
+      "applies_to_programs": ["architecture", "urban-planning", "design"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 2000,
+    "fields": {
+      "key": "ucl_application_portal",
+      "title": "UCL Application Portal",
+      "description": "Submit application through UCAS for undergraduate or directly for postgraduate programs.",
+      "scope": "university",
+      "university_id": 32,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://www.ucl.ac.uk/prospective-students/apply",
+      "official_source_label": "UCL Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "UCAS or online form",
+        "fee": "£27 for UCAS"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 2001,
+    "fields": {
+      "key": "ucl_personal_statement",
+      "title": "UCL Personal Statement",
+      "description": "Personal statement explaining your academic interests and why you want to study at UCL.",
+      "scope": "university",
+      "university_id": 32,
+      "requirement_type": "essay",
+      "verification_level": "official",
+      "official_source_url": "https://www.ucl.ac.uk/prospective-students/apply/undergraduate/how-apply/personal-statement",
+      "official_source_label": "UCL Admissions",
+      "min_days_before_deadline": 21,
+      "estimated_effort_hours": 8.0,
+      "document_rules": {
+        "format": "UCAS or online form",
+        "length": "4000 characters"
+      },
+      "prompt_text": "Why do you want to study this subject at UCL? Include your academic interests, relevant experience, and career goals.",
+      "evaluation_criteria": [
+        "Subject knowledge",
+        "Academic potential",
+        "Suitability for program",
+        "Writing quality"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 3000,
+    "fields": {
+      "key": "utoronto_application_portal",
+      "title": "University of Toronto Application",
+      "description": "Submit application through the OUAC application system.",
+      "scope": "university",
+      "university_id": 34,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://future.utoronto.ca/apply/",
+      "official_source_label": "U of T Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "OUAC online application",
+        "fee": "CAD $180-230 depending on program"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 3001,
+    "fields": {
+      "key": "utoronto_supplemental_essay",
+      "title": "University of Toronto Supplemental Essay",
+      "description": "Short answer questions about your academic interests and extracurricular activities.",
+      "scope": "university",
+      "university_id": 34,
+      "requirement_type": "essay",
+      "verification_level": "official",
+      "official_source_url": "https://future.utoronto.ca/apply/required-application-materials/supplementary-application/",
+      "official_source_label": "U of T Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 4.0,
+      "document_rules": {
+        "format": "Online form",
+        "questions": "3 short answer questions (250 words each)"
+      },
+      "prompt_text": "Complete three short answer questions about your engineering interests, extracurricular activities, and why U Toronto.",
+      "evaluation_criteria": [
+        "Academic interests",
+        "Leadership potential",
+        "Community engagement",
+        "Fit for program"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": [],
+      "applies_to_programs": ["engineering", "computer-science", "business"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 4000,
+    "fields": {
+      "key": "eth_zurich_application_portal",
+      "title": "ETH Zurich Application Portal",
+      "description": "Submit application through the ETH Zurich online application portal.",
+      "scope": "university",
+      "university_id": 41,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://ethz.ch/en/studies/admission.html",
+      "official_source_label": "ETH Zurich Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "Online application",
+        "fee": "CHF 150"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 4001,
+    "fields": {
+      "key": "eth_zurich_motivation",
+      "title": "ETH Zurich Letter of Motivation",
+      "description": "Explain your academic background, research interests, and why you want to study at ETH Zurich.",
+      "scope": "university",
+      "university_id": 41,
+      "requirement_type": "essay",
+      "verification_level": "official",
+      "official_source_url": "https://ethz.ch/en/studies/admission.html",
+      "official_source_label": "ETH Zurich Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 5.0,
+      "document_rules": {
+        "format": "PDF",
+        "length": "1-2 pages"
+      },
+      "prompt_text": "Describe your academic background, research interests, and motivation for studying at ETH Zurich.",
+      "evaluation_criteria": [
+        "Academic background",
+        "Research potential",
+        "Motivation",
+        "Fit for program"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 5000,
+    "fields": {
+      "key": "oxford_application_portal",
+      "title": "University of Oxford Application",
+      "description": "Submit application through UCAS by the deadline (usually October 15).",
+      "scope": "university",
+      "university_id": 29,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://www.ox.ac.uk/admissions/undergraduate/applying-to-oxford",
+      "official_source_label": "Oxford Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "UCAS application",
+        "deadline": "October 15",
+        "fee": "£27"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 5001,
+    "fields": {
+      "key": "oxford_written_work",
+      "title": "Oxford Written Work Submission",
+      "description": "Submit a recent piece of marked academic work from your current studies.",
+      "scope": "university",
+      "university_id": 29,
+      "requirement_type": "document",
+      "verification_level": "official",
+      "official_source_url": "https://www.ox.ac.uk/admissions/undergraduate/applying-to-oxford/guide-to-applying/written-work",
+      "official_source_label": "Oxford Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2.0,
+      "document_rules": {
+        "format": "PDF",
+        "details": "Marked academic essay from school",
+        "length": "2000-3000 words"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 6000,
+    "fields": {
+      "key": "cambridge_application_portal",
+      "title": "University of Cambridge Application",
+      "description": "Submit application through UCAS by the deadline (usually October 15) and complete Cambridge-specific form.",
+      "scope": "university",
+      "university_id": 30,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://www.undergraduate.study.cam.ac.uk/applying",
+      "official_source_label": "Cambridge Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 3.0,
+      "document_rules": {
+        "format": "UCAS + SAF (Supplementary Application Form)",
+        "deadline": "October 15",
+        "fee": "£27"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 6001,
+    "fields": {
+      "key": "cambridge_interview",
+      "title": "Cambridge Interview",
+      "description": "Attend academic interview with college admissions tutors. Usually held in December.",
+      "scope": "university",
+      "university_id": 30,
+      "requirement_type": "interview",
+      "verification_level": "official",
+      "official_source_url": "https://www.undergraduate.study.cam.ac.uk/interviews",
+      "official_source_label": "Cambridge Admissions",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 5.0,
+      "document_rules": {
+        "format": "In-person or online interview",
+        "duration": "30-60 minutes",
+        "preparation": "Review academic subjects and personal statement"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": [],
+      "activation_rule": "application_submitted"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 7000,
+    "fields": {
+      "key": "harvard_application_portal",
+      "title": "Harvard College Application",
+      "description": "Submit application through Common Application, Coalition Application, or QuestBridge.",
+      "scope": "university",
+      "university_id": 1,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://college.harvard.edu/admissions/apply",
+      "official_source_label": "Harvard Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 3.0,
+      "document_rules": {
+        "format": "Common App, Coalition, or QuestBridge",
+        "fee": "$75",
+        "deadlines": "REA Nov 1, Regular Jan 1"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 7001,
+    "fields": {
+      "key": "harvard_supplemental_essays",
+      "title": "Harvard Supplemental Essays",
+      "description": "Complete Harvard-specific supplemental essay questions.",
+      "scope": "university",
+      "university_id": 1,
+      "requirement_type": "essay",
+      "verification_level": "official",
+      "official_source_url": "https://college.harvard.edu/admissions/apply/first-year-applicants/application-requirements",
+      "official_source_label": "Harvard Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 10.0,
+      "document_rules": {
+        "format": "Online form",
+        "prompts": "5 short answer questions (200-word limit) + 1 optional essay"
+      },
+      "prompt_text": "Complete the Harvard-specific supplemental questions, including prompts about extracurricular activities, intellectual life, and writing supplement.",
+      "evaluation_criteria": [
+        "Intellectual curiosity",
+        "Personal qualities",
+        "Writing ability",
+        "Fit for Harvard"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 8000,
+    "fields": {
+      "key": "mit_application_portal",
+      "title": "MIT Application",
+      "description": "Submit application through MyMIT application portal.",
+      "scope": "university",
+      "university_id": 2,
+      "requirement_type": "application",
+      "verification_level": "official",
+      "official_source_url": "https://admissions.mit.edu/apply",
+      "official_source_label": "MIT Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 3.0,
+      "document_rules": {
+        "format": "MyMIT portal",
+        "fee": "$75",
+        "deadlines": "Early Action Nov 1, Regular Action Jan 1"
+      },
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": ["passport_valid", "academic_transcripts"]
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 8001,
+    "fields": {
+      "key": "mit_supplemental_essays",
+      "title": "MIT Supplemental Essays",
+      "description": "Complete MIT-specific short answer questions and essays.",
+      "scope": "university",
+      "university_id": 2,
+      "requirement_type": "essay",
+      "verification_level": "official",
+      "official_source_url": "https://admissions.mit.edu/apply/application-process/essays",
+      "official_source_label": "MIT Admissions",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 8.0,
+      "document_rules": {
+        "format": "MyMIT portal",
+        "prompts": "5 short-answer questions (100-250 words each)"
+      },
+      "prompt_text": "Tell us about what you do for fun, what you're learning, your community, and how you've collaborated.",
+      "evaluation_criteria": [
+        "Authenticity",
+        "Intellectual curiosity",
+        "Problem-solving approach",
+        "Collaborative spirit"
+      ],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "dependency_keys": []
+    }
+  }
+]

@@ -1,0 +1,703 @@
+[
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 1,
+    "fields": {
+      "key": "passport_validity",
+      "title": "Valid Passport",
+      "description": "Upload a scan of your passport. Must be valid for at least 6 months beyond your program start date.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "https://www.gov.uk/passport-application",
+      "official_source_label": "Government Passport Office",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 180,
+      "estimated_effort_hours": 2,
+      "document_rules": {
+        "format": "PDF or JPG",
+        "pages_required": "First page (photo) + signature page",
+        "max_size_mb": 5,
+        "notarized": false,
+        "translated": false
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Паспортты жүктеңіз. Бағдарлама басталуынан кемінде 6 ай бұрын жарамды болуы керек.",
+        "ru": "Загрузите паспорт. Должен быть действителен минимум 6 месяцев после начала программы."
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["passport_front", "passport_expiry_date"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 2,
+    "fields": {
+      "key": "ielts_score",
+      "title": "IELTS Academic Test",
+      "description": "Take IELTS Academic. Most universities require 6.5+ overall with no band below 6.0. Plan 2-3 weeks for preparation and 2 weeks for results.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "https://www.ielts.org/for-organisations/recognising-organisations",
+      "official_source_label": "IELTS Organization",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 40,
+      "document_rules": {
+        "format": "Test Report Form (TRF) Number",
+        "min_score": {
+          "overall": 6.5,
+          "bands": {"reading": 6.0, "writing": 6.0, "listening": 6.0, "speaking": 6.0}
+        },
+        "how_to_register": "Register at britishcouncil.kz or ielts.idp.com",
+        "test_centers": ["Almaty", "Astana", "Shymkent"],
+        "test_fee_kzt": 95000
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "IELTS Academic емтиханы. Британ Кеңесінің сайтында тіркеліңіз (britishcouncil.kz)",
+        "ru": "Экзамен IELTS Academic. Регистрация на сайте britishcouncil.kz"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["test_date", "overall_score", "reading_score", "writing_score", "listening_score", "speaking_score", "trf_number"],
+      "default_link_url": "https://www.britishcouncil.kz/en/exam/ielts"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 3,
+    "fields": {
+      "key": "toefl_score",
+      "title": "TOEFL iBT Test",
+      "description": "Take TOEFL iBT. Most universities require 80+ overall (iBT). Some require 90-100+. Check specific university requirements.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "https://www.ets.org/toefl",
+      "official_source_label": "ETS TOEFL",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 40,
+      "document_rules": {
+        "format": "Test Report Number",
+        "min_score": {
+          "overall": 80
+        },
+        "how_to_register": "Register at ets.org/toefl",
+        "test_centers_available": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "TOEFL iBT емтиханы. ets.org/toefl сайты арқылы тіркеліңіз",
+        "ru": "Экзамен TOEFL iBT. Регистрация на сайте ets.org/toefl"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["test_date", "total_score", "test_registration_number"],
+      "default_link_url": "https://www.ets.org/toefl"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 4,
+    "fields": {
+      "key": "sat_exam",
+      "title": "SAT Exam (US Universities)",
+      "description": "Take SAT if required by US universities. Many have made it optional, but check each university's policy.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "https://satsuite.collegeboard.org/sat",
+      "official_source_label": "College Board SAT",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 90,
+      "estimated_effort_hours": 60,
+      "document_rules": {
+        "format": "Test score report",
+        "min_score": {
+          "total": 1200,
+          "reading_writing": 600,
+          "math": 600
+        },
+        "optional": true,
+        "check_university_policy": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "SAT емтиханы - кейбір АҚШ университеттері қажет етеді",
+        "ru": "Экзамен SAT - требуется некоторыми университетами США"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["test_date", "total_score", "reading_writing_score", "math_score", "essay_score"],
+      "default_link_url": "https://satsuite.collegeboard.org/sat"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 5,
+    "fields": {
+      "key": "act_exam",
+      "title": "ACT Exam (US Universities)",
+      "description": "Take ACT as alternative to SAT for US universities. Check if accepted by your target universities.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "https://www.act.org/",
+      "official_source_label": "ACT",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 90,
+      "estimated_effort_hours": 60,
+      "document_rules": {
+        "format": "Test score report",
+        "min_score": {
+          "composite": 24
+        },
+        "optional": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["test_date", "composite_score", "english_score", "math_score", "reading_score", "science_score"],
+      "default_link_url": "https://www.act.org/"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 6,
+    "fields": {
+      "key": "transcripts",
+      "title": "Academic Transcripts",
+      "description": "Request official academic transcripts from your school. Must show all courses, grades, and GPA. May require notarization and translation.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "School Registrar",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 8,
+      "document_rules": {
+        "format": "PDF or certified paper copy",
+        "notarized": true,
+        "translated": "If not in English/Russian",
+        "official_seal": true,
+        "kz_specific": "Attestat diplomas must be notarized"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Оқу орнынан ресми транскрипт алыңыз. Нотариалды куәландыру қажет болуы мүмкін.",
+        "ru": "Запросите официальные транскрипты. Возможно потребуется нотариальное заверение."
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["transcript_file", "gpa", "grading_scale"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 7,
+    "fields": {
+      "key": "recommendation_letters",
+      "title": "Recommendation Letters",
+      "description": "Request 2-3 recommendation letters from teachers, counselors, or professors who know you well. Give recommenders 2-3 weeks notice.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "School Guidance Counselor",
+      "dependency_keys": ["transcripts"],
+      "activation_rule": "",
+      "min_days_before_deadline": 45,
+      "estimated_effort_hours": 6,
+      "document_rules": {
+        "format": "PDF or online form",
+        "quantity": 2,
+        "max_quantity": 3,
+        "recommender_types": ["teacher", "counselor", "professor"],
+        "provide_recommender_with": ["transcripts", "CV", "personal_statement_draft"]
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Мұғалімдерден 2-3 ұсынат хат сұраңыз. Оларға 2-3 апеуа уақыт беріңіз.",
+        "ru": "Запросите 2-3 рекомендации у учителей. Дайте им 2-3 недели на написание."
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["recommender_name", "recommender_email", "recommender_relationship", "letter_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 8,
+    "fields": {
+      "key": "cv_resume",
+      "title": "CV / Resume",
+      "description": "Create academic CV or resume highlighting your education, activities, achievements, skills, and experience. Keep to 1-2 pages.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Career Services",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 4,
+      "document_rules": {
+        "format": "PDF",
+        "max_pages": 2,
+        "preferred_length": "1 page for undergrad, 2 pages for grad school",
+        "include_sections": ["education", "activities", "achievements", "skills", "experience"],
+        "font_size": "10-12pt"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Академиялық CV жасаңыз. Білім, қызмет, жетістіктеріңізді көрсетіңіз.",
+        "ru": "Создайте академическое резюме. Укажите образование, деятельность, достижения."
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["cv_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 9,
+    "fields": {
+      "key": "personal_statement",
+      "title": "Personal Statement",
+      "description": "Write a personal statement explaining your academic background, career goals, and motivation for studying abroad. Typically 500-700 words.",
+      "category": "essays",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "University Admissions",
+      "dependency_keys": ["transcripts"],
+      "activation_rule": "",
+      "min_days_before_deadline": 21,
+      "estimated_effort_hours": 15,
+      "document_rules": {
+        "format": "PDF",
+        "word_count": "500-700 words",
+        "font": "Times New Roman, 12pt",
+        "spacing": "Double-spaced"
+      },
+      "evaluation_criteria": [
+        "Clarity of academic motivation",
+        "Specific examples of achievements",
+        "Career goal alignment",
+        "Writing quality and grammar",
+        "Personal voice and authenticity"
+      ],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Жеке мәлімдеме жазыңыз - біліміңіз, мақсатыңыз және мансап жоспарыңыз туралы.",
+        "ru": "Напишите личное высказывание о вашем образовании, целях и мотивации."
+      },
+      "prompt_text": "Describe your academic background, significant achievements, career goals, and why you want to study this field abroad. Be specific and authentic.",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["essay_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 10,
+    "fields": {
+      "key": "financial_proof",
+      "title": "Financial Support Document",
+      "description": "Provide proof of funds to cover tuition and living expenses for first year. Typically bank statement or sponsor letter showing €15,000-€30,000.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Bank or Sponsor",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 4,
+      "document_rules": {
+        "format": "Bank statement or sponsor letter PDF",
+        "must_be_recent": "Within last 3 months",
+        "amount_required": {
+          "eur": [15000, 30000],
+          "gbp": [12000, 25000],
+          "usd": [20000, 50000],
+          "cad": [25000, 50000]
+        },
+        "notarized": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Қаржылық қолдау құжаты - банк алыпқаты немесе демеуші хаты",
+        "ru": "Документ о финансовой поддержке - банковская выписка или письмо спонсора"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["bank_statement_file", "sponsor_letter_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 11,
+    "fields": {
+      "key": "translation_requirements",
+      "title": "Document Translation",
+      "description": "Get documents not in English translated by certified translator. May require notarization depending on destination country.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Certified Translation Service",
+      "dependency_keys": ["transcripts"],
+      "activation_rule": "",
+      "min_days_before_deadline": 21,
+      "estimated_effort_hours": 10,
+      "document_rules": {
+        "certified_translator_required": true,
+        "notarization": "Depends on destination",
+        "apostille": "Required for some countries",
+        "languages": "Kazakh and Russian to English"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Ағылшын тіліне аударма - куәландырылған аударушы арқылы",
+        "ru": "Перевод на английский - сертифицированным переводчиком"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["translated_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 12,
+    "fields": {
+      "key": "passport_photos",
+      "title": "Passport-Size Photos",
+      "description": "Get passport-size photos taken for applications, ID cards, and visas. Requirements vary by country.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Photo Studio",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 7,
+      "estimated_effort_hours": 1,
+      "document_rules": {
+        "dimensions": {
+          "standard": "35x45mm or 2x2 inches",
+          "european": "35x45mm",
+          "us": "2x2 inches"
+        },
+        "background": "White or light gray",
+        "quantity": "8-12 copies",
+        "digital_copy": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Паспорттық фотосуреттер - фото студиясында түсіріңіз",
+        "ru": "Паспортные фотографии - сделайте в фотоателье"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["photo_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 13,
+    "fields": {
+      "key": "medical_exam",
+      "title": "Medical Certificate",
+      "description": "Get medical certificate stating you're in good health and free from contagious diseases. Required for some countries and visa applications.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Licensed Physician",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 3,
+      "document_rules": {
+        "format": "Official medical certificate PDF",
+        "valid_for": "3-6 months",
+        "required_tests": ["chest_xray", "blood_test"],
+        "english_translation": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Медициналық анықтама - дәрігерден алыңыз",
+        "ru": "Медицинская справка - получите у врача"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["medical_certificate_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 14,
+    "fields": {
+      "key": "police_clearance",
+      "title": "Police Clearance Certificate",
+      "description": "Obtain police clearance certificate (no criminal record). Required for some visa applications. Valid for 3-6 months.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Local Police Department",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 8,
+      "document_rules": {
+        "format": "Official certificate with stamp",
+        "notarized": true,
+        "translated": true,
+        "valid_for": "3-6 months"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Полициядан тазалық туралы анықтама алыңыз",
+        "ru": "Справка об отсутствии судимости получите в полиции"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["clearance_certificate_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 15,
+    "fields": {
+      "key": "application_fee",
+      "title": "Application Fee Payment",
+      "description": "Pay application fee for each university. Fees range from $50-$150 per application. Some offer fee waivers.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "University Admissions",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 7,
+      "estimated_effort_hours": 2,
+      "document_rules": {
+        "payment_methods": ["credit_card", "paypal"],
+        "typical_cost_usd": [50, 150],
+        "non_refundable": true,
+        "fee_waiver_available": "For eligible students"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Өтінім ақысы - университет құны $50-$150",
+        "ru": "Сбор за подачу заявления - $50-$150 за университет"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["payment_confirmation"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 16,
+    "fields": {
+      "key": "interview_preparation",
+      "title": "Interview Preparation",
+      "description": "Prepare for university admission interview if required. Research common questions and practice responses.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "University Admissions",
+      "dependency_keys": ["personal_statement"],
+      "activation_rule": "",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 8,
+      "document_rules": {
+        "preparation_time": "1-2 weeks",
+        "practice_methods": ["mock_interviews", "record_yourself", "research_questions"]
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Сұхбат дайындығы - жалпы сұрақтарды оқып, жаттаңыз",
+        "ru": "Подготовка к интервью - изучите общие вопросы и потренируйтесь"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": [],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 17,
+    "fields": {
+      "key": "scholarship_application",
+      "title": "Scholarship Application",
+      "description": "Apply for scholarships to fund your education. Many require separate essays, recommendations, and financial information.",
+      "category": "docs",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Scholarship Provider",
+      "dependency_keys": ["personal_statement", "financial_proof"],
+      "activation_rule": "",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 20,
+      "document_rules": {
+        "common_requirements": ["essay", "recommendations", "financial_info"],
+        "apply_early": "Many scholarships have earlier deadlines than admission"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": true,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Стипендияға өтінім беріңіз - жеке есеп, қажетті құжаттарды дайындаңыз",
+        "ru": "Подайте заявку на стипендию - подготовьте финансовые документы и эссе"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["scholarship_essay", "financial_documents"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 18,
+    "fields": {
+      "key": "offer_acceptance",
+      "title": "Accept Admission Offer",
+      "description": "Accept admission offer by the deadline (typically May 1 for US universities). Submit deposit and confirm enrollment.",
+      "category": "offer",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "University Admissions",
+      "dependency_keys": ["offer_letter"],
+      "activation_rule": "offer_received",
+      "min_days_before_deadline": 14,
+      "estimated_effort_hours": 2,
+      "document_rules": {
+        "deposit_required": true,
+        "deposit_non_refundable": true,
+        "response_methods": ["online_portal", "email"],
+        "typical_deposit_usd": [200, 1000]
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Ұсынысты қабылдаңыз - депозит төлеңіз және тіркеліңіз",
+        "ru": "Примите предложение о приеме - внесите депозит и подтвердите зачисление"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["acceptance_confirmation", "deposit_payment"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 19,
+    "fields": {
+      "key": "enrollment_deposit",
+      "title": "Enrollment Deposit",
+      "description": "Pay enrollment deposit to secure your place. This is typically applied to your first semester tuition.",
+      "category": "offer",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "University Bursar",
+      "dependency_keys": ["offer_letter", "offer_acceptance"],
+      "activation_rule": "offer_accepted",
+      "min_days_before_deadline": 7,
+      "estimated_effort_hours": 1,
+      "document_rules": {
+        "non_refundable": true,
+        "applied_to_tuition": true,
+        "payment_methods": ["credit_card", "wire_transfer", "check"]
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Тіркелу депозиті - орныңыз сақтау үшін төлеңіз",
+        "ru": "Депозит за зачисление - заплатите для закрепления места"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["payment_confirmation"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 20,
+    "fields": {
+      "key": "student_visa_general",
+      "title": "Student Visa Application",
+      "description": "Apply for student visa after receiving offer letter and paying deposit. Requirements vary by country.",
+      "category": "visa",
+      "scope": "global",
+      "official_source_url": "",
+      "official_source_label": "Embassy or Consulate",
+      "dependency_keys": ["offer_letter", "enrollment_deposit", "passport_validity", "financial_proof"],
+      "activation_rule": "enrollment_confirmed",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 20,
+      "document_rules": {
+        "processing_time": "2-8 weeks depending on country",
+        "interview_required": "Depends on country",
+        "biometrics_required": true,
+        "varies_by_country": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Студенттік виза - ұсыныс алған соң елшілікте алыңыз",
+        "ru": "Студенческая виза - подавайте в посольстве после получения предложения"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["visa_application_file", "appointment_confirmation"],
+      "default_link_url": ""
+    }
+  }
+]

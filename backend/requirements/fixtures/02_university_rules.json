@@ -1,0 +1,342 @@
+[
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 1,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 68,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 2,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 68,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 3,
+    "fields": {
+      "template": 5,
+      "scope": "university",
+      "university": 68,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 4,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 68,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "Politecnico di Milano Motivation Letter"},
+      "link_url": "https://www.polimi.it/en/international-prospective-students/application-procedures/",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 5,
+    "fields": {
+      "template": 8,
+      "scope": "university",
+      "university": 68,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "Politecnico di Milano Architecture Portfolio"},
+      "link_url": "https://www.polimi.it/en/international-prospective-students/application-procedures/",
+      "priority": "blocker",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 6,
+    "fields": {
+      "template": 2,
+      "scope": "university",
+      "university": 68,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "warning",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 10,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 32,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 11,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 32,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 12,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 32,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "UCL Personal Statement"},
+      "link_url": "https://www.ucl.ac.uk/prospective-students/apply/undergraduate/how-apply/personal-statement",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 13,
+    "fields": {
+      "template": 7,
+      "scope": "university",
+      "university": 32,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 20,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 34,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 21,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 34,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 22,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 34,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "University of Toronto Personal Statement"},
+      "link_url": "https://future.utoronto.ca/apply/required-application-materials/supplementary-application/",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 30,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 29,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 31,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 29,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 32,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 29,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "Oxford Personal Statement"},
+      "link_url": "https://www.ox.ac.uk/admissions/undergraduate/applying-to-oxford",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 40,
+    "fields": {
+      "template": 1,
+      "scope": "university",
+      "university": 1,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 41,
+    "fields": {
+      "template": 4,
+      "scope": "university",
+      "university": 1,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 42,
+    "fields": {
+      "template": 6,
+      "scope": "university",
+      "university": 1,
+      "country": "",
+      "conditions": {},
+      "overrides": {"title": "Harvard Supplemental Essays"},
+      "link_url": "https://college.harvard.edu/admissions/apply/first-year-applicants/application-requirements",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "requirements.RequirementRule",
+    "pk": 43,
+    "fields": {
+      "template": 7,
+      "scope": "university",
+      "university": 1,
+      "country": "",
+      "conditions": {},
+      "overrides": {},
+      "link_url": "",
+      "priority": "info",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]
