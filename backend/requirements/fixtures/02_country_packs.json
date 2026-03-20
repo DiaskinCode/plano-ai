@@ -1,0 +1,532 @@
+[
+  {
+    "model": "requirements.RequirementPack",
+    "pk": 1,
+    "fields": {
+      "name": "Italy Student Visa Requirements",
+      "pack_type": "country",
+      "country": "italy",
+      "requirement_templates": ["italy_student_visa", "italy_financial_proof", "italy_domicile"],
+      "is_active": true
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 101,
+    "fields": {
+      "key": "italy_student_visa",
+      "title": "Italy Type D Student Visa",
+      "description": "Apply for student visa at Italian Embassy in Astana. Requires offer letter, proof of funds, health insurance, and accommodation. Processing takes 2-4 weeks.",
+      "category": "visa",
+      "scope": "country",
+      "country": "italy",
+      "official_source_url": "https://vistopermaria.esteri.it",
+      "official_source_label": "Italian Embassy Astana",
+      "dependency_keys": ["offer_letter", "passport_validity", "italy_financial_proof"],
+      "activation_rule": "enrollment_confirmed",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 15,
+      "document_rules": {
+        "application_form": "Online at vistopermaria.esteri.it",
+        "required_documents": [
+          "Passport valid 3+ months",
+          "Offer letter from university",
+          "Proof of funds (€6,000/year)",
+          "Health insurance (€30,000 coverage)",
+          "Accommodation contract or housing arrangement",
+          "Flight reservation",
+          "Passport photos (2)",
+          "Travel insurance"
+        ],
+        "appointment_required": true,
+        "biometrics": true,
+        "processing_time": "2-4 weeks",
+        "visa_fee_eur": 50
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Италия студент визасы - Астана қаласындағы Италия елшілігінде алынады",
+        "ru": "Студенческая виза Италии - оформляется в посольстве Италии в Астане"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["visa_approval_file", "entry_visa_sticker"],
+      "default_link_url": "https://ambconsaratna.esteri.it"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 102,
+    "fields": {
+      "key": "italy_financial_proof",
+      "title": "Italy Financial Requirements",
+      "description": "Show proof of funds for Italian student visa: €6,000/year minimum. Must show bank statements, sponsor letter, or scholarship confirmation.",
+      "category": "docs",
+      "scope": "country",
+      "country": "italy",
+      "official_source_url": "https://vistopermaria.esteri.it",
+      "official_source_label": "Italian Embassy Requirements",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 3,
+      "document_rules": {
+        "minimum_amount_eur": 6000,
+        "per_year": true,
+        "acceptable_proof": [
+          "Bank statements (last 3 months)",
+          "Sponsor letter with income proof",
+          "Scholarship confirmation",
+          "Education loan confirmation"
+        ],
+        "must_be_liquid_funds": true,
+        "notarized": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Италия үшін қаржылық дәлелдерді көрсетіңіз - жылына €6,000",
+        "ru": "Подтвердите финансовые средства для Италии - €6,000 в год"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["bank_statement", "sponsor_letter"],
+      "default_link_url": "https://vistopermaria.esteri.it"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 103,
+    "fields": {
+      "key": "italy_domicile",
+      "title": "Domicile (Permit to Stay)",
+      "description": "Apply for Permesso di Soggiorno (residence permit) within 8 days of arrival in Italy. Required for stays over 90 days.",
+      "category": "visa",
+      "scope": "country",
+      "country": "italy",
+      "official_source_url": "https://www.poliziadistato.it",
+      "official_source_label": "Italian Post Office",
+      "dependency_keys": ["italy_student_visa"],
+      "activation_rule": "arrived_in_italy",
+      "min_days_before_deadline": 8,
+      "estimated_effort_hours": 6,
+      "document_rules": {
+        "apply_within_days": 8,
+        "at": "Local Post Office (Poste Italiane)",
+        "required_documents": [
+          "Passport with visa",
+          "4 passport photos",
+          "Proof of accommodation",
+          "University enrollment certificate",
+          "Revenue stamp (marca da bollo €16)",
+          "Health insurance",
+          "Receipt of €70 payment"
+        ],
+        "fingerprint_appointment": true,
+        "processing_time": "2-4 months"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Тұруғы рұқсаты (Permesso di Soggiorno) - Италияға келген соң 8 күн ішінде алыңыз",
+        "ru": "Вид на жительство (Permesso di Soggiorno) - подайте в течение 8 дней после прибытия"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["domicile_receipt_file"],
+      "default_link_url": "https://www.poste.it"
+    }
+  },
+  {
+    "model": "requirements.RequirementPack",
+    "pk": 2,
+    "fields": {
+      "name": "UK Student Visa Requirements",
+      "pack_type": "country",
+      "country": "united_kingdom",
+      "requirement_templates": ["uk_student_visa", "uk_ihs_surcharge", "uk_tb_test"],
+      "is_active": true
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 201,
+    "fields": {
+      "key": "uk_student_visa",
+      "title": "UK Student Visa (Tier 4 General)",
+      "description": "Apply for UK student visa after receiving CAS number from university. Takes 3-8 weeks to process.",
+      "category": "visa",
+      "scope": "country",
+      "country": "united_kingdom",
+      "official_source_url": "https://www.gov.uk/student-visa",
+      "official_source_label": "UK Visas and Immigration",
+      "dependency_keys": ["offer_letter", "passport_validity", "uk_ihs_surcharge"],
+      "activation_rule": "cas_received",
+      "min_days_before_deadline": 90,
+      "estimated_effort_hours": 12,
+      "document_rules": {
+        "cas_number_required": true,
+        "required_documents": [
+          "Valid passport",
+          "CAS confirmation number",
+          "IHS payment confirmation",
+          "TB test certificate",
+          "Bank statements (28 days)",
+          "Academic Technology Approval Scheme (ATAS) if required",
+          "Parental consent if under 18"
+        ],
+        "interview_required": "Maybe (credibility interview)",
+        "biometrics": true,
+        "visa_fee_gbp": 490,
+        "processing_time": "3 weeks standard, 8 weeks non-standard"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "UK студент визасы - CAS нөмірін алған соң өтінім беріңіз",
+        "ru": "Студенческая виза UK - подавайте после получения номера CAS"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["visa_brp_card", "entry_clearance"],
+      "default_link_url": "https://www.gov.uk/student-visa"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 202,
+    "fields": {
+      "key": "uk_ihs_surcharge",
+      "title": "Immigration Health Surcharge (IHS)",
+      "description": "Pay Immigration Health Surcharge to access UK's National Health Service (NHS). £470 per year for students.",
+      "category": "visa",
+      "scope": "country",
+      "country": "united_kingdom",
+      "official_source_url": "https://www.gov.uk/health-surcharge",
+      "official_source_label": "NHS Business Services Authority",
+      "dependency_keys": ["offer_letter"],
+      "activation_rule": "cas_received",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 1,
+      "document_rules": {
+        "payment_required": true,
+        "cost_gbp_per_year": 470,
+        "pay_before": "Visa application",
+        "online_payment": true,
+        "payment_url": "https://www.gov.uk/health-surcharge"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Денсаулық сақтау жарнасы (IHS) - NHS жүйесіне қатысу үшін",
+        "ru": "Сбор за здравоохранение (IHS) для доступа к NHS"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["ihs_payment_reference"],
+      "default_link_url": "https://www.gov.uk/health-surcharge"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 203,
+    "fields": {
+      "key": "uk_tb_test",
+      "title": "UK Tuberculosis Test",
+      "description": "Take TB test at approved clinic if visiting UK for more than 6 months. Valid for 6 months.",
+      "category": "visa",
+      "scope": "country",
+      "country": "united_kingdom",
+      "official_source_url": "https://www.gov.uk/tb-test-visa",
+      "official_source_label": "UK Approved Clinic",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 4,
+      "document_rules": {
+        "approved_clinics": ["Almaty", "Astana", "Shymkent"],
+        "test_types": ["chest_xray", "sputum_test"],
+        "valid_for": "6 months",
+        "cost_usd": 100,
+        "appointment_required": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Туберкулез тесті - UK-ге 6 айдан көп болу үшін қажет",
+        "ru": "Тест на туберкулез - требуется для пребывания в UK более 6 месяцев"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["tb_certificate_file"],
+      "default_link_url": "https://www.gov.uk/tb-test-visa"
+    }
+  },
+  {
+    "model": "requirements.RequirementPack",
+    "pk": 3,
+    "fields": {
+      "name": "USA Student Visa Requirements",
+      "pack_type": "country",
+      "country": "united_states",
+      "requirement_templates": ["usa_student_visa", "usa_sevis_fee", "usa_i20_form"],
+      "is_active": true
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 301,
+    "fields": {
+      "key": "usa_student_visa",
+      "title": "USA F-1 Student Visa",
+      "description": "Apply for F-1 visa at US embassy after receiving I-20 form. Includes visa interview. Process takes 2-8 weeks.",
+      "category": "visa",
+      "scope": "country",
+      "country": "united_states",
+      "official_source_url": "https://www.usembassy.gov",
+      "official_source_label": "US Department of State",
+      "dependency_keys": ["usa_i20_form", "usa_sevis_fee", "passport_validity"],
+      "activation_rule": "i20_received",
+      "min_days_before_deadline": 90,
+      "estimated_effort_hours": 16,
+      "document_rules": {
+        "interview_required": true,
+        "ds160_form": true,
+        "required_documents": [
+          "I-20 form from university",
+          "SEVIS payment receipt",
+          "DS-160 confirmation",
+          "Passport valid 6+ months beyond program",
+          "Application fee payment ($185)",
+          "Academic transcripts",
+          "Financial proof",
+          "Passport photo"
+        ],
+        "visa_fee_usd": 185,
+        "sevis_fee_usd": 350,
+        "interview_wait_time": "2-8 weeks depending on embassy"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "АҚШ F-1 визасы - I-20 алған соң елшілікте сұхбат өтіңіз",
+        "ru": "Виза F-1 США - пройдите интервью в посольстве после получения I-20"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["visa_stamp_in_passport"],
+      "default_link_url": "https://www.usembassy.gov"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 302,
+    "fields": {
+      "key": "usa_sevis_fee",
+      "title": "SEVIS I-901 Fee",
+      "description": "Pay SEVIS fee (I-901) for F-1 visa. $350 for students. Required before visa interview.",
+      "category": "visa",
+      "scope": "country",
+      "country": "united_states",
+      "official_source_url": "https://www.fmjfee.com",
+      "official_source_label": "US Immigration and Customs Enforcement",
+      "dependency_keys": ["usa_i20_form"],
+      "activation_rule": "i20_received",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 1,
+      "document_rules": {
+        "payment_required": true,
+        "fee_usd": 350,
+        "payment_methods": ["credit_card", "debit_card", "western_union"],
+        "keep_receipt": "Required for visa interview",
+        "online_payment": true
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "SEVIS жарнасы - визаға өтіну алдын төлеңіз",
+        "ru": "Сбор SEVIS - оплатите перед подачей заявления на визу"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["sevis_receipt_file"],
+      "default_link_url": "https://www.fmjfee.com"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 303,
+    "fields": {
+      "key": "usa_i20_form",
+      "title": "I-20 Form (Certificate of Eligibility)",
+      "description": "Receive I-20 form from university after accepting offer and showing financial proof. Required for visa application.",
+      "category": "visa",
+      "scope": "country",
+      "country": "united_states",
+      "official_source_url": "",
+      "official_source_label": "University International Office",
+      "dependency_keys": ["offer_acceptance", "financial_proof"],
+      "activation_rule": "enrollment_confirmed",
+      "min_days_before_deadline": 45,
+      "estimated_effort_hours": 2,
+      "document_rules": {
+        "university_issues": true,
+        "required_from_student": [
+          "Proof of funds (tuition + living expenses for 1 year)",
+          "Enrollment deposit",
+          "Passport copy",
+          "Signed acceptance letter"
+        ],
+        "shipping_method": "Express courier (DHL/FedEx)",
+        "processing_time": "2-4 weeks"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "I-20 пішіні - университеттен қаржылық дәлел көрсеткен соң алыңыз",
+        "ru": "Форма I-20 - получите от университета после подтверждения финансов"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["i20_form_file"],
+      "default_link_url": ""
+    }
+  },
+  {
+    "model": "requirements.RequirementPack",
+    "pk": 4,
+    "fields": {
+      "name": "Canada Study Permit Requirements",
+      "pack_type": "country",
+      "country": "canada",
+      "requirement_templates": ["canada_study_permit", "canada_biometrics", "canada_medical_exam"],
+      "is_active": true
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 401,
+    "fields": {
+      "key": "canada_study_permit",
+      "title": "Canada Study Permit",
+      "description": "Apply for study permit after receiving LOA (Letter of Acceptance). Apply online or at VFS office. Processing 4-12 weeks.",
+      "category": "visa",
+      "scope": "country",
+      "country": "canada",
+      "official_source_url": "https://www.canada.ca/en/immigration-refugees-citizenship",
+      "official_source_label": "Immigration, Refugees and Citizenship Canada",
+      "dependency_keys": ["offer_letter", "passport_validity"],
+      "activation_rule": "loa_received",
+      "min_days_before_deadline": 120,
+      "estimated_effort_hours": 10,
+      "document_rules": {
+        "online_application": true,
+        "required_documents": [
+          "Letter of Acceptance",
+          "Valid passport",
+          "Proof of funds (tuition + $10,000 living expenses)",
+          "Passport photos",
+          "Statement of purpose",
+          "Educational documents",
+          "Medical exam results (if required)",
+          "Biometrics confirmation"
+        ],
+        "application_fee_cad": 150,
+        "biometrics_fee_cad": 85,
+        "processing_time": "4 weeks online, 12 weeks paper"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": true,
+      "country_localization_notes": {
+        "kz": "Канада оқу рұқсаты - LOA алған соң онлайн немесе VFS кеңсесінде өтінім беріңіз",
+        "ru": "Разрешение на учебу в Канаде - подавайте онлайн или в офисе VFS после получения LOA"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["study_permit_document", "port_of_entry_letter"],
+      "default_link_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-study-permit-online.html"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 402,
+    "fields": {
+      "key": "canada_biometrics",
+      "title": "Canada Biometrics",
+      "description": "Give biometrics (fingerprints and photo) at VFS Application Centre after receiving biometrics instruction letter.",
+      "category": "visa",
+      "scope": "country",
+      "country": "canada",
+      "official_source_url": "https://www.vfsglobal.com/canada/kazakhstan",
+      "official_source_label": "VFS Global",
+      "dependency_keys": ["offer_letter"],
+      "activation_rule": "biometric_instruction_received",
+      "min_days_before_deadline": 30,
+      "estimated_effort_hours": 2,
+      "document_rules": {
+        "appointment_required": true,
+        "at": "VFS Application Centre",
+        "fee_cad": 85,
+        "biometric_instruction": "Required before appointment",
+        "valid_for": "10 years"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Биометрика - VFS орталығында саусақ ізі мен фотосуретті алыңыз",
+        "ru": "Биометрия - пройдите в центре VFS для сдачи отпечатков пальцев и фото"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["biometrics_confirmation_letter"],
+      "default_link_url": "https://www.vfsglobal.com/canada/kazakhstan"
+    }
+  },
+  {
+    "model": "requirements.RequirementTemplate",
+    "pk": 403,
+    "fields": {
+      "key": "canada_medical_exam",
+      "title": "Canada Medical Exam",
+      "description": "Complete medical exam with panel physician if required (usually from certain countries or for certain programs).",
+      "category": "visa",
+      "scope": "country",
+      "country": "canada",
+      "official_source_url": "https://www.canada.ca/en/immigration-refugees-citizenship",
+      "official_source_label": "Designated Panel Physician",
+      "dependency_keys": [],
+      "activation_rule": "",
+      "min_days_before_deadline": 60,
+      "estimated_effort_hours": 3,
+      "document_rules": {
+        "panel_physician_required": true,
+        "exam_includes": ["chest_xray", "blood_test", "physical_exam"],
+        "results_valid_for": "12 months",
+        "find_physician_at": "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/medical-police/medical-exams/doctors.html"
+      },
+      "evaluation_criteria": [],
+      "reusable_across_targets": false,
+      "post_offer_only": false,
+      "country_localization_notes": {
+        "kz": "Медициналық емтихан - уәкілдік дәрігермен өтіңіз",
+        "ru": "Медицинский осмотр - пройдите у назначенного врача"
+      },
+      "prompt_text": "",
+      "applies_to_programs": [],
+      "default_evidence_fields": ["medical_exam_confirmation"],
+      "default_link_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/medical-police/medical-exams/doctors.html"
+    }
+  }
+]

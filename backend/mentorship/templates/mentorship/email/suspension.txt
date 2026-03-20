@@ -1,0 +1,14 @@
+MENTOR ACCOUNT SUSPENDED
+
+Hi {{ mentor.title }},
+
+Your mentor account has been suspended due to multiple flags.
+
+REASON:
+{{ reason }}
+
+If you believe this is an error, you may request reinstatement by contacting our support team
+with an explanation of the situation.
+
+Best regards,
+The PathAI Team
