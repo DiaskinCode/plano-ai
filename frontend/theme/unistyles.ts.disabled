@@ -1,0 +1,37 @@
+import { StyleSheet } from 'react-native-unistyles';
+import { darkTheme } from './themes/dark';
+
+// Define breakpoints for responsive design
+const breakpoints = {
+  xs: 0,
+  sm: 380,
+  md: 428,
+  lg: 768,
+  xl: 1024,
+} as const;
+
+// Define themes
+const themes = {
+  dark: darkTheme,
+} as const;
+
+// Configure unistyles
+StyleSheet.configure({
+  themes,
+  breakpoints,
+  settings: {
+    initialTheme: 'dark',
+  },
+});
+
+// Export types for TypeScript
+type AppBreakpoints = typeof breakpoints;
+type AppThemes = typeof themes;
+
+declare module 'react-native-unistyles' {
+  export interface UnistylesBreakpoints extends AppBreakpoints {}
+  export interface UnistylesThemes extends AppThemes {}
+}
+
+export { StyleSheet };
+export { breakpoints, themes };
