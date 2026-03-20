@@ -1,0 +1,71 @@
+# Python/Django
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/env/
+backend/venv/
+ENV/
+env/
+venv/
+*.log
+backend/local_settings.py
+backend/db.sqlite3
+backend/db.sqlite3-journal
+backend/staticfiles/
+backend/media/
+*.pot
+*.mo
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Node.js/React Native/Expo
+frontend/node_modules/
+frontend/node_modules/
+frontend/npm-debug.*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.expo
+frontend/expo-shared/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+*.pem
+frontend/.watchmanconfig
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude
+.claude/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
